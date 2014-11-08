@@ -91,3 +91,34 @@ void enable_rs232(void)
     /* Enable the RS232 port. */
     USART_Cmd(USART1, ENABLE);
 }
+
+void TIMER2_Configuration(void)
+{
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+    
+    //TIMER 2 is on APB1 -> 84MHz
+    TIM_TimeBaseStructure.TIM_Period = 1 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 84 - 1;
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
+    TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+
+    NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+
+    TIM_Cmd(TIM2, ENABLE);
+}
+
+void TIMER2_Enable_Interrupt(){
+    TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+}
+
+void TIMER2_Disable_Interrupt(){
+    TIM_ITConfig(TIM2, TIM_IT_Update, Disable);
+}
+

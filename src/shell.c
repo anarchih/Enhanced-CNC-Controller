@@ -254,10 +254,11 @@ void test_ramfs_command(int n, char *argv[]) {
 }
 
 void gcode_command(int n, char* argv[]){
+    fio_printf(1, "\r\n");
     char buf[128] = {'\0'};
     while (strncmp(buf, "MO2", 3) != 0){
         fio_read(0, buf, 127);
-        //ExcuteGCode(buf);
+        ExcuteGCode(buf);
     }
 }
 cmdfunc *do_command(const char *cmd){

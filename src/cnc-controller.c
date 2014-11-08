@@ -8,6 +8,8 @@
 
 #include "stm32f4xx_gpio.h"
 
+#define INCLUDE_vTaskSuspend 1
+
 QueueHandle_t   operationQueue;
 
 SemaphoreHandle_t stepperXMutex;
@@ -47,6 +49,7 @@ static void setStepperState(uint32_t state){
 }
 
 void TIM2_IRQHandler(void){
+    GPIO_ToggleBits(GPIOG, GPIO_Pin_14);
     if(timer2State){
         GPIO_SetBits(GPIOG, GPIO_Pin_13);
 
@@ -121,10 +124,6 @@ void cnc_controller_depatch_task(void *pvParameters){
                 yStepsHalf = yStepsBuffer >> 1;
                 zStepsHalf = zStepsBuffer >> 1;
                 
-                if(operation.parameter1 > 0)
-                    GPIO_SetBits(GPIOG, GPIO_Pin_14);
-                else
-                    GPIO_ResetBits(GPIOG, GPIO_Pin_14);
                 
 
                 TIM_PrescalerConfig(TIM2, 10000 / xCurrSpeed, TIM_PSCReloadMode_Immediate);

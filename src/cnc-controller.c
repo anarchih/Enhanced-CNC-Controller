@@ -6,6 +6,8 @@
 #include "cnc-controller.h"
 #include "stm32_f429.h"
 
+#include "stm32f4xx_gpio.h"
+
 QueueHandle_t   operationQueue;
 
 SemaphoreHandle_t stepperXMutex;
@@ -46,8 +48,7 @@ static void setStepperState(uint32_t state){
 
 void TIM2_IRQHandler(void){
     if(timer2State){
-        //TODO: Set GPIO
-        //
+        GPIO_SetBits(GPIOG, GPIO_Pin_13);
 
         xStepsBuffer--;
         
@@ -62,9 +63,11 @@ void TIM2_IRQHandler(void){
                 xCurrSpeed = xMaxSpeed;
             else if(xCurrSpeed < 0)
                 xCurrSpeed = 0;
+
+            TIM_PrescalerConfig(TIM2, 10000 / xCurrSpeed, TIM_PSCReloadMode_Immediate);
         }
     }else{
-        //TODO: Reset GPIO
+        GPIO_ResetBits(GPIOG, GPIO_Pin_13);
     }
     timer2State = !timer2State;
 
@@ -109,7 +112,7 @@ void cnc_controller_depatch_task(void *pvParameters){
                 xSemaphoreTake(stepperYMutex, 0);
                 xSemaphoreTake(stepperZMutex, 0);
 
-                xCurrSpeed = yCurrSpeed = zCurrSpeed = 0;
+                xCurrSpeed = yCurrSpeed = zCurrSpeed = 10;
                 xStepsBuffer = (operation.parameter1 > 0) ? operation.parameter1 : (-1) *  operation.parameter1;
                 yStepsBuffer = (operation.parameter2 > 0) ? operation.parameter2 : (-1) *  operation.parameter2;
                 zStepsBuffer = (operation.parameter3 > 0) ? operation.parameter3 : (-1) *  operation.parameter3;
@@ -117,8 +120,13 @@ void cnc_controller_depatch_task(void *pvParameters){
                 yStepsHalf = yStepsBuffer >> 1;
                 zStepsHalf = zStepsBuffer >> 1;
                 
-                //TODO: Set Dir GPIO
+                if(operation.parameter1 > 0)
+                    GPIO_SetBits(GPIOG, GPIO_Pin_14);
+                else
+                    GPIO_ResetBits(GPIOG, GPIO_Pin_14);
+                
 
+                TIM_PrescalerConfig(TIM2, 10000 / xCurrSpeed, TIM_PSCReloadMode_Immediate);
                 TIMER2_Enable_Interrupt();
                 break;
             case enableStepper:

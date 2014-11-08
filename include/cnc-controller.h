@@ -13,28 +13,6 @@
 #define yDefaultMaxSpeed 1000
 #define zDefaultMaxSpeed 1000
 
-QueueHandle_t   operationQueue;
-
-SemaphoreHandle_t stepperXMutex;
-SemaphoreHandle_t stepperYMutex;
-SemaphoreHandle_t stepperZMutex;
-
-uint32_t timer2State;
-uint32_t timer2Count;
-
-uint32_t xStepsBuffer;
-uint32_t yStepsBuffer;
-uint32_t zStepsBuffer;
-uint32_t xStepsHalf;
-uint32_t yStepsHalf;
-uint32_t zStepsHalf;
-
-uint32_t xMaxSpeed;
-uint32_t yMaxSpeed;
-uint32_t zMaxSpeed;
-int32_t xCurrSpeed;
-int32_t yCurrSpeed;
-int32_t zCurrSpeed;
 
 enum CNC_Opcodes{
     moveStepper = 0,
@@ -54,7 +32,9 @@ struct CNC_Operation_t {
 
 void  cnc_controller_init(void);
 
-void cnc_controller_depatch_task(void);
+void cnc_controller_depatch_task(void *pvParameters);
+
+void CNC_Move(uint32_t x, uint32_t y, uint32_t z);
 
 
 #endif

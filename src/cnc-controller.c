@@ -6,6 +6,29 @@
 #include "cnc-controller.h"
 #include "stm32_f429.h"
 
+QueueHandle_t   operationQueue;
+
+SemaphoreHandle_t stepperXMutex;
+SemaphoreHandle_t stepperYMutex;
+SemaphoreHandle_t stepperZMutex;
+
+uint32_t timer2State;
+uint32_t timer2Count;
+
+uint32_t xStepsBuffer;
+uint32_t yStepsBuffer;
+uint32_t zStepsBuffer;
+uint32_t xStepsHalf;
+uint32_t yStepsHalf;
+uint32_t zStepsHalf;
+
+uint32_t xMaxSpeed;
+uint32_t yMaxSpeed;
+uint32_t zMaxSpeed;
+int32_t xCurrSpeed;
+int32_t yCurrSpeed;
+int32_t zCurrSpeed;
+
 static void setStepperState(uint32_t state){
     xSemaphoreTake(stepperXMutex, 0);
     xSemaphoreTake(stepperYMutex, 0);
@@ -70,7 +93,7 @@ void  cnc_controller_init(void){
     return;
 }
 
-void cnc_controller_depatch_task(void){
+void cnc_controller_depatch_task(void *pvParameters){
     struct CNC_Operation_t operation;
     
     if((operationQueue == 0) || (stepperXMutex == NULL) || (stepperYMutex == NULL) || (stepperZMutex == NULL)){
@@ -108,4 +131,18 @@ void cnc_controller_depatch_task(void){
                 break;
         } 
     }
+}
+
+void CNC_Move(uint32_t x, uint32_t y, uint32_t z){
+    struct CNC_Operation_t operation;
+    if(operationQueue == 0)
+        return;
+
+    operation.opcodes = moveStepper; 
+    operation.parameter1 = x;
+    operation.parameter2 = y;
+    operation.parameter3 = z;
+
+    xQueueSend(operationQueue, &operation, 0);
+    return;
 }

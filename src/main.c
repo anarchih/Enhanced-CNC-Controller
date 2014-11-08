@@ -18,6 +18,8 @@
 #include "shell.h"
 #include "host.h"
 
+#include "cnc-controller.h"
+
 /* _sromfs symbol can be found in main.ld linker script
  * it contains file system structure of test_romfs directory
  */
@@ -157,6 +159,8 @@ int main()
     USART1_Configuration();
 	enable_rs232_interrupts();
 	enable_rs232();
+
+    cnc_controller_init();
 	
 	fs_init();
 	fio_init();
@@ -181,6 +185,9 @@ int main()
 	            "CLI",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
 
+	xTaskCreate(cnc_controller_depatch_task,
+	            "CNC",
+	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
 #if 0
 	/* Create a task to record system log. */
 	xTaskCreate(system_logger,

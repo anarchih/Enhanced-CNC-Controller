@@ -99,7 +99,7 @@ void TIMER2_Configuration(void)
     
     //TIMER 2 is on APB1 -> 84MHz
     TIM_TimeBaseStructure.TIM_Period = 1 - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 84 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 8400 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;

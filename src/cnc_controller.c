@@ -4,6 +4,7 @@
 #include "queue.h"
 
 #include "cnc-controller.h"
+#include "stm32_f429.h"
 
 static void setStepperState(uint32_t state){
     xSemaphoreTake(stepperMutex, 0);
@@ -14,6 +15,10 @@ static void setStepperState(uint32_t state){
     }
     xSemaphoreGive(stepperMutex);
     return;
+}
+
+void TIM2_IRQHandler(void){
+
 }
 
 void  cnc_controller_init(void){
@@ -41,8 +46,10 @@ void cnc_controller_depatch_task(void){
         switch(operation.opcodes){
             case moveStepper:
                 xSemaphoreTake(stepperMutex, 0);
-
-
+                xStepsBuffer = operation.parameter1;
+                yStepsBuffer = operation.parameter2;
+                zStepsBuffer = operation.parameter3;
+//                TIMER2_Enable_Interrput();
                 break;
             case enableStepper:
                 setStepperState(1);

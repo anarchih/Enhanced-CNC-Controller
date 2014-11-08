@@ -26,4 +26,7 @@ void enable_rs232_interrupts(void);
 
 void enable_rs232(void);
 
+void TIMER2_Configuration(void);
+void TIMER2_Enable_Interrupt();
+void TIMER2_Disable_Interrupt();
 #endif /* __STM32_F429_H */

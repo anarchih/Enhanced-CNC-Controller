@@ -1,6 +1,10 @@
 #include <string.h>
-//#include <stdlib.h>
 #include "gcodeinter.h"
+#include "cnc-controller.h"
+#define MAX_F 100.0
+#define X_STEP_LENGTH 1.0
+#define Y_STEP_LENGTH 1.0
+#define Z_STEP_LENGTH 1.0
 int abs_mode = 1;
 float curr_x = 0;
 float curr_y = 0;
@@ -25,7 +29,7 @@ float atof(const char* s){
     };
     return rez * fact;
 };
-void G00(char gcode[], struct Exist *exist){
+void line_move(char gcode[], struct Exist *exist){
     struct Vector v;
     int t = strlen(gcode);
     char tmp;
@@ -51,7 +55,9 @@ void G00(char gcode[], struct Exist *exist){
     if(!exist->x)v.x = 0;
     if(!exist->y)v.y = 0;
     if(!exist->z)v.z = 0;
-    if(!exist->f)v.f = 0;
+    if(!exist->f)v.f = MAX_F;
+    CNC_Move((int)(v.x/X_STEP_LENGTH), (int)(v.y/Y_STEP_LENGTH), (int)(v.z/Z_STEP_LENGTH));
+    
     
 }/*
 void G02(char gcode[], struct Exist *exist){
@@ -97,7 +103,7 @@ void G02(char gcode[], struct Exist *exist){
     for (float theta = theta1; theta<theta2; theta+=0.1)
         
 }*/
-void Parser(char* gcode,struct Exist *exist){
+void CheckExist(char* gcode,struct Exist *exist){
     for (int i=0; i<strlen(gcode); i++){
         switch (gcode[i]){
             case 'X':
@@ -131,14 +137,15 @@ void Parser(char* gcode,struct Exist *exist){
 void ExcuteGCode(char *gcode){
     struct Exist exist;
     // G00 G01 G02 G03 G90 G91 G92 M02 M03 M04 M17 M18 
-    if (strncmp(gcode, "G00", 3) == 0){
-        Parser(gcode, &exist);
-        G00(gcode, &exist);
+    if (strncmp(gcode, "G00", 3) == 0 ||
+        strncmp(gcode, "G10", 3) == 0 ||
+        strncmp(gcode, "G0", 2) == 0 ||
+        strncmp(gcode, "G1", 2) == 0  ){
+
+        CheckExist(gcode, &exist);
+        line_move(gcode, &exist);
     }
     
-    if (strncmp(gcode, "G01", 3) == 0){
-    
-    }
     if (strncmp(gcode, "G04", 3) == 0){
 
     }

@@ -4,4 +4,5 @@ build/main/src/cnc_controller.o: src/cnc_controller.c \
  freertos/portable/GCC/ARM_CM4F/portmacro.h \
  freertos/include/mpu_wrappers.h freertos/include/task.h \
  freertos/include/list.h include/host.h freertos/include/queue.h \
- include/cnc-controller.h
+ include/cnc-controller.h freertos/include/semphr.h \
+ freertos/include/queue.h

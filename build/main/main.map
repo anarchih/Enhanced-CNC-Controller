@@ -88,22 +88,27 @@ Discarded input sections
  .group         0x0000000000000000        0x8 build/main/src/cnc_controller.o
  .group         0x0000000000000000        0x8 build/main/src/cnc_controller.o
  .group         0x0000000000000000        0x8 build/main/src/cnc_controller.o
+ .group         0x0000000000000000        0x8 build/main/src/cnc_controller.o
  .text          0x0000000000000000        0x0 build/main/src/cnc_controller.o
  .data          0x0000000000000000        0x0 build/main/src/cnc_controller.o
  .bss           0x0000000000000000        0x0 build/main/src/cnc_controller.o
  .bss.operationQueue
                 0x0000000000000000        0x4 build/main/src/cnc_controller.o
- .text.cnc_controller_init
-                0x0000000000000000       0x34 build/main/src/cnc_controller.o
- .text.cnc_controller_depatch_task
+ .bss.stepperMutex
+                0x0000000000000000        0x4 build/main/src/cnc_controller.o
+ .text.setStepperState
                 0x0000000000000000       0x4c build/main/src/cnc_controller.o
- .debug_info    0x0000000000000000      0x14a build/main/src/cnc_controller.o
- .debug_abbrev  0x0000000000000000       0xcb build/main/src/cnc_controller.o
- .debug_loc     0x0000000000000000       0x64 build/main/src/cnc_controller.o
+ .text.cnc_controller_init
+                0x0000000000000000       0x58 build/main/src/cnc_controller.o
+ .text.cnc_controller_depatch_task
+                0x0000000000000000       0xa4 build/main/src/cnc_controller.o
+ .debug_info    0x0000000000000000      0x1a5 build/main/src/cnc_controller.o
+ .debug_abbrev  0x0000000000000000       0xf2 build/main/src/cnc_controller.o
+ .debug_loc     0x0000000000000000       0x9c build/main/src/cnc_controller.o
  .debug_aranges
-                0x0000000000000000       0x28 build/main/src/cnc_controller.o
- .debug_ranges  0x0000000000000000       0x18 build/main/src/cnc_controller.o
- .debug_macro   0x0000000000000000      0x15a build/main/src/cnc_controller.o
+                0x0000000000000000       0x30 build/main/src/cnc_controller.o
+ .debug_ranges  0x0000000000000000       0x20 build/main/src/cnc_controller.o
+ .debug_macro   0x0000000000000000      0x16d build/main/src/cnc_controller.o
  .debug_macro   0x0000000000000000      0x826 build/main/src/cnc_controller.o
  .debug_macro   0x0000000000000000      0x16c build/main/src/cnc_controller.o
  .debug_macro   0x0000000000000000       0x3a build/main/src/cnc_controller.o
@@ -126,12 +131,13 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x35 build/main/src/cnc_controller.o
  .debug_macro   0x0000000000000000       0x58 build/main/src/cnc_controller.o
  .debug_macro   0x0000000000000000       0xb0 build/main/src/cnc_controller.o
- .debug_line    0x0000000000000000      0x3ba build/main/src/cnc_controller.o
- .debug_str     0x0000000000000000     0x7ba6 build/main/src/cnc_controller.o
+ .debug_macro   0x0000000000000000       0x7e build/main/src/cnc_controller.o
+ .debug_line    0x0000000000000000      0x3ee build/main/src/cnc_controller.o
+ .debug_str     0x0000000000000000     0x83a2 build/main/src/cnc_controller.o
  .comment       0x0000000000000000       0x71 build/main/src/cnc_controller.o
  .ARM.attributes
                 0x0000000000000000       0x35 build/main/src/cnc_controller.o
- .debug_frame   0x0000000000000000       0x4c build/main/src/cnc_controller.o
+ .debug_frame   0x0000000000000000       0x6c build/main/src/cnc_controller.o
  .group         0x0000000000000000        0x8 build/main/src/devfs.o
  .group         0x0000000000000000        0x8 build/main/src/devfs.o
  .group         0x0000000000000000        0x8 build/main/src/devfs.o
@@ -759,6 +765,8 @@ Discarded input sections
  .text          0x0000000000000000        0x0 build/main/src/stm32_f429.o
  .data          0x0000000000000000        0x0 build/main/src/stm32_f429.o
  .bss           0x0000000000000000        0x0 build/main/src/stm32_f429.o
+ .text.init_rs232
+                0x0000000000000000       0x14 build/main/src/stm32_f429.o
  .debug_macro   0x0000000000000000      0x826 build/main/src/stm32_f429.o
  .debug_macro   0x0000000000000000       0x64 build/main/src/stm32_f429.o
  .debug_macro   0x0000000000000000       0x3b build/main/src/stm32_f429.o
@@ -6377,101 +6385,98 @@ LOAD /usr/local/Cellar/gcc-arm-none-eabi/20140408/bin/../lib/gcc/arm-none-eabi/4
  .text.command_prompt
                 0x0000000008002190       0xac build/main/src/main.o
                 0x0000000008002190                command_prompt
- .text.main     0x000000000800223c       0xdc build/main/src/main.o
+ .text.main     0x000000000800223c       0xe4 build/main/src/main.o
                 0x000000000800223c                main
  .text.vApplicationTickHook
-                0x0000000008002318        0xc build/main/src/main.o
-                0x0000000008002318                vApplicationTickHook
+                0x0000000008002320        0xc build/main/src/main.o
+                0x0000000008002320                vApplicationTickHook
  .text.circbuf_size
-                0x0000000008002324       0x48 build/main/src/mmtest.o
+                0x000000000800232c       0x48 build/main/src/mmtest.o
  .text.write_cb
-                0x000000000800236c       0x9c build/main/src/mmtest.o
- .text.read_cb  0x0000000008002408       0xb8 build/main/src/mmtest.o
- .text.prng     0x00000000080024c0       0x58 build/main/src/mmtest.o
+                0x0000000008002374       0x9c build/main/src/mmtest.o
+ .text.read_cb  0x0000000008002410       0xb8 build/main/src/mmtest.o
+ .text.prng     0x00000000080024c8       0x58 build/main/src/mmtest.o
  .text.mmtest_command
-                0x0000000008002518      0x170 build/main/src/mmtest.o
-                0x0000000008002518                mmtest_command
+                0x0000000008002520      0x170 build/main/src/mmtest.o
+                0x0000000008002520                mmtest_command
  .text.osDbgPrintf
-                0x0000000008002688       0x10 build/main/src/osdebug.o
-                0x0000000008002688                osDbgPrintf
+                0x0000000008002690       0x10 build/main/src/osdebug.o
+                0x0000000008002690                osDbgPrintf
  .text.init_superblock
-                0x0000000008002698       0x70 build/main/src/ramfs.o
+                0x00000000080026a0       0x70 build/main/src/ramfs.o
  .text.add_inode
-                0x0000000008002708       0xd0 build/main/src/ramfs.o
+                0x0000000008002710       0xd0 build/main/src/ramfs.o
  .text.add_block
-                0x00000000080027d8       0x80 build/main/src/ramfs.o
+                0x00000000080027e0       0x80 build/main/src/ramfs.o
  .text.ramfs_write
-                0x0000000008002858      0x1f0 build/main/src/ramfs.o
+                0x0000000008002860      0x1f0 build/main/src/ramfs.o
  .text.ramfs_read
-                0x0000000008002a48      0x190 build/main/src/ramfs.o
+                0x0000000008002a50      0x190 build/main/src/ramfs.o
  .text.ramfs_readdir
-                0x0000000008002bd8       0xf8 build/main/src/ramfs.o
+                0x0000000008002be0       0xf8 build/main/src/ramfs.o
  .text.ramfs_seek
-                0x0000000008002cd0       0xa4 build/main/src/ramfs.o
-                0x0000000008002cd0                ramfs_seek
+                0x0000000008002cd8       0xa4 build/main/src/ramfs.o
+                0x0000000008002cd8                ramfs_seek
  .text.ramfs_i_create
-                0x0000000008002d74       0xa0 build/main/src/ramfs.o
-                0x0000000008002d74                ramfs_i_create
+                0x0000000008002d7c       0xa0 build/main/src/ramfs.o
+                0x0000000008002d7c                ramfs_i_create
  .text.ramfs_i_mkdir
-                0x0000000008002e14       0xac build/main/src/ramfs.o
-                0x0000000008002e14                ramfs_i_mkdir
+                0x0000000008002e1c       0xac build/main/src/ramfs.o
+                0x0000000008002e1c                ramfs_i_mkdir
  .text.ramfs_i_lookup
-                0x0000000008002ec0      0x110 build/main/src/ramfs.o
-                0x0000000008002ec0                ramfs_i_lookup
+                0x0000000008002ec8      0x110 build/main/src/ramfs.o
+                0x0000000008002ec8                ramfs_i_lookup
  .text.ramfs_read_inode
-                0x0000000008002fd0       0xc8 build/main/src/ramfs.o
-                0x0000000008002fd0                ramfs_read_inode
+                0x0000000008002fd8       0xc8 build/main/src/ramfs.o
+                0x0000000008002fd8                ramfs_read_inode
  .text.ramfs_read_superblock
-                0x0000000008003098       0x78 build/main/src/ramfs.o
-                0x0000000008003098                ramfs_read_superblock
+                0x00000000080030a0       0x78 build/main/src/ramfs.o
+                0x00000000080030a0                ramfs_read_superblock
  .text.register_ramfs
-                0x0000000008003110       0x1c build/main/src/ramfs.o
-                0x0000000008003110                register_ramfs
+                0x0000000008003118       0x1c build/main/src/ramfs.o
+                0x0000000008003118                register_ramfs
  .text.parse_command
-                0x000000000800312c       0xdc build/main/src/shell.o
-                0x000000000800312c                parse_command
+                0x0000000008003134       0xdc build/main/src/shell.o
+                0x0000000008003134                parse_command
  .text.ls_command
-                0x0000000008003208      0x298 build/main/src/shell.o
-                0x0000000008003208                ls_command
+                0x0000000008003210      0x298 build/main/src/shell.o
+                0x0000000008003210                ls_command
  .text.filedump
-                0x00000000080034a0       0x84 build/main/src/shell.o
-                0x00000000080034a0                filedump
+                0x00000000080034a8       0x84 build/main/src/shell.o
+                0x00000000080034a8                filedump
  .text.ps_command
-                0x0000000008003524       0x14 build/main/src/shell.o
-                0x0000000008003524                ps_command
+                0x000000000800352c       0x14 build/main/src/shell.o
+                0x000000000800352c                ps_command
  .text.cat_command
-                0x0000000008003538       0x68 build/main/src/shell.o
-                0x0000000008003538                cat_command
+                0x0000000008003540       0x68 build/main/src/shell.o
+                0x0000000008003540                cat_command
  .text.man_command
-                0x00000000080035a0       0x90 build/main/src/shell.o
-                0x00000000080035a0                man_command
+                0x00000000080035a8       0x90 build/main/src/shell.o
+                0x00000000080035a8                man_command
  .text.host_command
-                0x0000000008003630      0x114 build/main/src/shell.o
-                0x0000000008003630                host_command
+                0x0000000008003638      0x114 build/main/src/shell.o
+                0x0000000008003638                host_command
  .text.help_command
-                0x0000000008003744       0x84 build/main/src/shell.o
-                0x0000000008003744                help_command
+                0x000000000800374c       0x84 build/main/src/shell.o
+                0x000000000800374c                help_command
  .text.test_command
-                0x00000000080037c8       0xa0 build/main/src/shell.o
-                0x00000000080037c8                test_command
+                0x00000000080037d0       0xa0 build/main/src/shell.o
+                0x00000000080037d0                test_command
  .text.test_ramfs_command
-                0x0000000008003868       0x90 build/main/src/shell.o
-                0x0000000008003868                test_ramfs_command
+                0x0000000008003870       0x90 build/main/src/shell.o
+                0x0000000008003870                test_ramfs_command
  .text.do_command
-                0x00000000080038f8       0x74 build/main/src/shell.o
-                0x00000000080038f8                do_command
+                0x0000000008003900       0x74 build/main/src/shell.o
+                0x0000000008003900                do_command
  .text.RCC_Configuration
-                0x000000000800396c       0x20 build/main/src/stm32_f429.o
-                0x000000000800396c                RCC_Configuration
+                0x0000000008003974       0x2c build/main/src/stm32_f429.o
+                0x0000000008003974                RCC_Configuration
  .text.GPIO_Configuration
-                0x000000000800398c       0x64 build/main/src/stm32_f429.o
-                0x000000000800398c                GPIO_Configuration
+                0x00000000080039a0       0x64 build/main/src/stm32_f429.o
+                0x00000000080039a0                GPIO_Configuration
  .text.USART1_Configuration
-                0x00000000080039f0       0x54 build/main/src/stm32_f429.o
-                0x00000000080039f0                USART1_Configuration
- .text.init_rs232
-                0x0000000008003a44       0x14 build/main/src/stm32_f429.o
-                0x0000000008003a44                init_rs232
+                0x0000000008003a04       0x54 build/main/src/stm32_f429.o
+                0x0000000008003a04                USART1_Configuration
  .text.enable_rs232_interrupts
                 0x0000000008003a58       0x54 build/main/src/stm32_f429.o
                 0x0000000008003a58                enable_rs232_interrupts
@@ -6946,7 +6951,7 @@ LOAD /usr/local/Cellar/gcc-arm-none-eabi/20140408/bin/../lib/gcc/arm-none-eabi/4
  .bss.serial_rx_queue
                 0x0000000020000d50        0x4 build/main/src/main.o
                 0x0000000020000d50                serial_rx_queue
- .bss.xHigherPriorityTaskWoken.9329
+ .bss.xHigherPriorityTaskWoken.9330
                 0x0000000020000d54        0x4 build/main/src/main.o
  .bss.write_pointer
                 0x0000000020000d58        0x4 build/main/src/mmtest.o
@@ -7364,31 +7369,31 @@ OUTPUT(build/main/main.elf elf32-littlearm)
  .debug_macro   0x00000000000136e7      0x178 build/main/freertos/portable/GCC/ARM_CM4F/port.o
  .debug_macro   0x000000000001385f      0x1eb build/main/CORTEX_M4F_STM32F4/startup/system_stm32f4xx.o
 
-.debug_line     0x0000000000000000     0x8377
+.debug_line     0x0000000000000000     0x837b
  .debug_line    0x0000000000000000      0x58a build/main/src/clib.o
  .debug_line    0x000000000000058a      0x4de build/main/src/devfs.o
  .debug_line    0x0000000000000a68      0x507 build/main/src/filesystem.o
  .debug_line    0x0000000000000f6f      0x675 build/main/src/fio.o
  .debug_line    0x00000000000015e4      0x2f2 build/main/src/hash-djb2.o
  .debug_line    0x00000000000018d6      0x321 build/main/src/host.o
- .debug_line    0x0000000000001bf7      0x851 build/main/src/main.o
- .debug_line    0x0000000000002448      0x463 build/main/src/mmtest.o
- .debug_line    0x00000000000028ab       0x3c build/main/src/osdebug.o
- .debug_line    0x00000000000028e7      0x628 build/main/src/ramfs.o
- .debug_line    0x0000000000002f0f      0x598 build/main/src/shell.o
- .debug_line    0x00000000000034a7      0x65b build/main/src/stm32_f429.o
- .debug_line    0x0000000000003b02      0x3bc build/main/src/string-util.o
- .debug_line    0x0000000000003ebe      0x3c9 build/main/freertos/list.o
- .debug_line    0x0000000000004287      0x67a build/main/freertos/queue.o
- .debug_line    0x0000000000004901      0xab8 build/main/freertos/tasks.o
- .debug_line    0x00000000000053b9      0x670 build/main/../STM32F429I-Discovery_FW_V1.0.1/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.o
- .debug_line    0x0000000000005a29      0x766 build/main/../STM32F429I-Discovery_FW_V1.0.1/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.o
- .debug_line    0x000000000000618f      0xa66 build/main/../STM32F429I-Discovery_FW_V1.0.1/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.o
- .debug_line    0x0000000000006bf5      0x8b7 build/main/../STM32F429I-Discovery_FW_V1.0.1/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.o
- .debug_line    0x00000000000074ac      0x3bf build/main/freertos/portable/MemMang/heap_1.o
- .debug_line    0x000000000000786b      0x422 build/main/freertos/portable/GCC/ARM_CM4F/port.o
- .debug_line    0x0000000000007c8d       0x88 build/main/CORTEX_M4F_STM32F4/startup_stm32f429_439xx.o
- .debug_line    0x0000000000007d15      0x662 build/main/CORTEX_M4F_STM32F4/startup/system_stm32f4xx.o
+ .debug_line    0x0000000000001bf7      0x853 build/main/src/main.o
+ .debug_line    0x000000000000244a      0x463 build/main/src/mmtest.o
+ .debug_line    0x00000000000028ad       0x3c build/main/src/osdebug.o
+ .debug_line    0x00000000000028e9      0x628 build/main/src/ramfs.o
+ .debug_line    0x0000000000002f11      0x598 build/main/src/shell.o
+ .debug_line    0x00000000000034a9      0x65d build/main/src/stm32_f429.o
+ .debug_line    0x0000000000003b06      0x3bc build/main/src/string-util.o
+ .debug_line    0x0000000000003ec2      0x3c9 build/main/freertos/list.o
+ .debug_line    0x000000000000428b      0x67a build/main/freertos/queue.o
+ .debug_line    0x0000000000004905      0xab8 build/main/freertos/tasks.o
+ .debug_line    0x00000000000053bd      0x670 build/main/../STM32F429I-Discovery_FW_V1.0.1/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.o
+ .debug_line    0x0000000000005a2d      0x766 build/main/../STM32F429I-Discovery_FW_V1.0.1/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.o
+ .debug_line    0x0000000000006193      0xa66 build/main/../STM32F429I-Discovery_FW_V1.0.1/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.o
+ .debug_line    0x0000000000006bf9      0x8b7 build/main/../STM32F429I-Discovery_FW_V1.0.1/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.o
+ .debug_line    0x00000000000074b0      0x3bf build/main/freertos/portable/MemMang/heap_1.o
+ .debug_line    0x000000000000786f      0x422 build/main/freertos/portable/GCC/ARM_CM4F/port.o
+ .debug_line    0x0000000000007c91       0x88 build/main/CORTEX_M4F_STM32F4/startup_stm32f429_439xx.o
+ .debug_line    0x0000000000007d19      0x662 build/main/CORTEX_M4F_STM32F4/startup/system_stm32f4xx.o
 
 .debug_str      0x0000000000000000    0x6deb3
  .debug_str     0x0000000000000000     0x8ef1 build/main/src/clib.o

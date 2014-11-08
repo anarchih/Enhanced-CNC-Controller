@@ -2,6 +2,7 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_rcc.h"
+#include "stm32f4xx_tim.h"
 #include "stm32f4xx_usart.h"
 #include "stm32f4xx_exti.h"
 #include "misc.h"
@@ -13,6 +14,8 @@ void RCC_Configuration(void)
       RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
       /* GPIOA clock enable */
       RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+      /* Timer 2 clock enable */
+      RCC_AHB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 }
 
 

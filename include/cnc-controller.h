@@ -5,13 +5,14 @@
 #include "queue.h"
 #include "semphr.h"
 
-QueueHandle_t   operationQueue;
+#define xAccelaration 10 
+#define yAccelaration 10 
+#define zAccelaration 10 
 
-SemaphoreHandle_t stepperMutex;
+#define xDefaultMaxSpeed 1000
+#define yDefaultMaxSpeed 1000
+#define zDefaultMaxSpeed 1000
 
-uint32_t xStepsBuffer;
-uint32_t yStepsBuffer;
-uint32_t zStepsBuffer;
 
 enum CNC_Opcodes{
     moveStepper = 0,
@@ -31,7 +32,9 @@ struct CNC_Operation_t {
 
 void  cnc_controller_init(void);
 
-void cnc_controller_depatch_task(void);
+void cnc_controller_depatch_task(void *pvParameters);
+
+void CNC_Move(uint32_t x, uint32_t y, uint32_t z);
 
 
 #endif

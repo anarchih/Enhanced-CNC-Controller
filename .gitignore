@@ -29,4 +29,8 @@
 *.hex
 
 build/main/*
+*.map
+*.lst
+*.bin
+*.o.d
 *.swp

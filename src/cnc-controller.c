@@ -6,6 +6,8 @@
 #include "cnc-controller.h"
 #include "stm32_f429.h"
 
+#include "stm32f4xx_gpio.h"
+
 QueueHandle_t   operationQueue;
 
 SemaphoreHandle_t stepperXMutex;
@@ -46,8 +48,7 @@ static void setStepperState(uint32_t state){
 
 void TIM2_IRQHandler(void){
     if(timer2State){
-        //TODO: Set GPIO
-        //
+        GPIO_SetBits(GPIOG, GPIO_Pin_13);
 
         xStepsBuffer--;
         
@@ -62,9 +63,11 @@ void TIM2_IRQHandler(void){
                 xCurrSpeed = xMaxSpeed;
             else if(xCurrSpeed < 0)
                 xCurrSpeed = 0;
+
+            TIM_PrescalerConfig(TIM2, 10000 / xCurrSpeed, TIM_PSCReloadMode_Immediate);
         }
     }else{
-        //TODO: Reset GPIO
+        GPIO_ResetBits(GPIOG, GPIO_Pin_13);
     }
     timer2State = !timer2State;
 
@@ -88,6 +91,7 @@ void  cnc_controller_init(void){
     timer2State = timer2Count = 0;
 
     xCurrSpeed = yCurrSpeed = zCurrSpeed = 0;
+    xMaxSpeed = yMaxSpeed = zMaxSpeed = 30;
     xStepsBuffer = yStepsBuffer = zStepsBuffer = 0;
 
     return;
@@ -109,15 +113,22 @@ void cnc_controller_depatch_task(void *pvParameters){
                 xSemaphoreTake(stepperYMutex, 0);
                 xSemaphoreTake(stepperZMutex, 0);
 
-                xCurrSpeed = yCurrSpeed = zCurrSpeed = 0;
-                xStepsBuffer = operation.parameter1;
-                yStepsBuffer = operation.parameter2;
-                zStepsBuffer = operation.parameter3;
+                xCurrSpeed = yCurrSpeed = zCurrSpeed = 10;
+                xStepsBuffer = (operation.parameter1 > 0) ? operation.parameter1 : (-1) *  operation.parameter1;
+                yStepsBuffer = (operation.parameter2 > 0) ? operation.parameter2 : (-1) *  operation.parameter2;
+                zStepsBuffer = (operation.parameter3 > 0) ? operation.parameter3 : (-1) *  operation.parameter3;
                 xStepsHalf = xStepsBuffer >> 1;
                 yStepsHalf = yStepsBuffer >> 1;
                 zStepsHalf = zStepsBuffer >> 1;
+                
+                if(operation.parameter1 > 0)
+                    GPIO_SetBits(GPIOG, GPIO_Pin_14);
+                else
+                    GPIO_ResetBits(GPIOG, GPIO_Pin_14);
+                
 
-//                TIMER2_Enable_Interrput();
+                TIM_PrescalerConfig(TIM2, 10000 / xCurrSpeed, TIM_PSCReloadMode_Immediate);
+                TIMER2_Enable_Interrupt();
                 break;
             case enableStepper:
                 setStepperState(1);
@@ -133,7 +144,7 @@ void cnc_controller_depatch_task(void *pvParameters){
     }
 }
 
-void CNC_Move(uint32_t x, uint32_t y, uint32_t z){
+void CNC_Move(int32_t x, int32_t y, int32_t z){
     struct CNC_Operation_t operation;
     if(operationQueue == 0)
         return;

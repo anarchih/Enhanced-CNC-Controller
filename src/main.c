@@ -159,7 +159,8 @@ int main()
     USART1_Configuration();
 	enable_rs232_interrupts();
 	enable_rs232();
-
+    
+    TIMER2_Configuration();
     cnc_controller_init();
 	
 	fs_init();

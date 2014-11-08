@@ -12,8 +12,9 @@ void RCC_Configuration(void)
       /* --------------------------- System Clocks Configuration -----------------*/
       /* USART1 clock enable */
       RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-      /* GPIOA clock enable */
+      /* GPIO clock enable */
       RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+      RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG, ENABLE);
       /* Timer 2 clock enable */
       RCC_AHB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 }
@@ -36,6 +37,20 @@ void GPIO_Configuration(void)
     /* Connect USART pins to AF */
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_USART1);   // USART1_TX
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);  // USART1_RX
+     
+    //Pins 13 and 14
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14;
+    //Mode output
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    //Output type push-pull
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    //Without pull resistors
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    //50MHz pin speed
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+     
+    //Initialize pins on GPIOG port
+    GPIO_Init(GPIOG, &GPIO_InitStructure);
 }
  
 /**************************************************************************************/

@@ -1,31 +1,30 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <math.h>
+//#include <stdlib.h>
 #include "gcodeinter.h"
 int abs_mode = 1;
 float curr_x = 0;
 float curr_y = 0;
 float curr_z = 0;
 
-struct Exist{ 
-    unsigned int x :1;
-    unsigned int y :1;
-    unsigned int z :1;    
-    unsigned int i :1; 
-    unsigned int j :1;
-    unsigned int k :1;
-    unsigned int f :1;    
-    unsigned int s :1;
+float atof(const char* s){
+    float rez = 0, fact = 1;
+    if (*s == '-'){
+        s++;
+        fact = -1;
+    };
+    for (int point_seen = 0; *s; s++){
+        if (*s == '.'){
+            point_seen = 1; 
+            continue;
+        };
+    int d = *s - '0';
+    if (d >= 0 && d <= 9){
+        if (point_seen) fact /= 10.0f;
+        rez = rez * 10.0f + (float)d;
+        };
+    };
+    return rez * fact;
 };
-struct Vector{
-    int op;
-    float x;
-    float y;
-    float z;
-    float f;
-};
-
 void G00(char gcode[], struct Exist *exist){
     struct Vector v;
     int t = strlen(gcode);
@@ -35,7 +34,6 @@ void G00(char gcode[], struct Exist *exist){
         if ((gcode[i]<48 || gcode[i]>57) && gcode[i]!='.'){
             tmp = gcode[t];
             gcode[t] = '\0';
-            printf("%s ", gcode+i+1);
             if(gcode[i] == 'F')v.f = atof(gcode+i+1);
             else if(gcode[i] == 'Z')v.z = atof(gcode+i+1);
             else if(gcode[i] == 'Y')v.y = atof(gcode+i+1);

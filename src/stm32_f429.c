@@ -119,6 +119,6 @@ void TIMER2_Enable_Interrupt(){
 }
 
 void TIMER2_Disable_Interrupt(){
-    TIM_ITConfig(TIM2, TIM_IT_Update, Disable);
+    TIM_ITConfig(TIM2, TIM_IT_Update, DISABLE);
 }
 

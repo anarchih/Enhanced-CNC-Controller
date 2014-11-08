@@ -46,10 +46,10 @@ void cnc_controller_depatch_task(void){
         switch(operation.opcodes){
             case moveStepper:
                 xSemaphoreTake(stepperMutex, 0);
-                xStepBuf = opeaeation.parameter1;
-                yStepBuf = opeaeation.parameter2;
-                zStepBuf = opeaeation.parameter3;
-                TIMER2_Enable_Interrput();
+                xStepsBuffer = operation.parameter1;
+                yStepsBuffer = operation.parameter2;
+                zStepsBuffer = operation.parameter3;
+//                TIMER2_Enable_Interrput();
                 break;
             case enableStepper:
                 setStepperState(1);

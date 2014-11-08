@@ -255,10 +255,13 @@ void test_ramfs_command(int n, char *argv[]) {
 
 void gcode_command(int n, char* argv[]){
     char buf[128] = {'\0'};
+    fio_printf(1, "\r\n");
     while (strncmp(buf, "MO2", 3) != 0){
         fio_read(0, buf, 127);
-        //ExcuteGCode(buf);
+        fio_printf(1, "\r\n");
+        ExcuteGCode(buf);
     }
+    fio_printf(1, "close\r\n");
 }
 cmdfunc *do_command(const char *cmd){
 

@@ -91,6 +91,7 @@ void  cnc_controller_init(void){
     timer2State = timer2Count = 0;
 
     xCurrSpeed = yCurrSpeed = zCurrSpeed = 0;
+    xMaxSpeed = yMaxSpeed = zMaxSpeed = 30;
     xStepsBuffer = yStepsBuffer = zStepsBuffer = 0;
 
     return;

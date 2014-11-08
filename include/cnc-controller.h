@@ -25,16 +25,16 @@ enum CNC_Opcodes{
 
 struct CNC_Operation_t {
     uint32_t opcodes;
-    uint32_t parameter1;
-    uint32_t parameter2;
-    uint32_t parameter3;
+    int32_t parameter1;
+    int32_t parameter2;
+    int32_t parameter3;
 };
 
 void  cnc_controller_init(void);
 
 void cnc_controller_depatch_task(void *pvParameters);
 
-void CNC_Move(uint32_t x, uint32_t y, uint32_t z);
+void CNC_Move(int32_t x, int32_t y, int32_t z);
 
 
 #endif

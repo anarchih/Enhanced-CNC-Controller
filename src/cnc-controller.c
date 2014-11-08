@@ -110,14 +110,16 @@ void cnc_controller_depatch_task(void *pvParameters){
                 xSemaphoreTake(stepperZMutex, 0);
 
                 xCurrSpeed = yCurrSpeed = zCurrSpeed = 0;
-                xStepsBuffer = operation.parameter1;
-                yStepsBuffer = operation.parameter2;
-                zStepsBuffer = operation.parameter3;
+                xStepsBuffer = (operation.parameter1 > 0) ? operation.parameter1 : (-1) *  operation.parameter1;
+                yStepsBuffer = (operation.parameter2 > 0) ? operation.parameter2 : (-1) *  operation.parameter2;
+                zStepsBuffer = (operation.parameter3 > 0) ? operation.parameter3 : (-1) *  operation.parameter3;
                 xStepsHalf = xStepsBuffer >> 1;
                 yStepsHalf = yStepsBuffer >> 1;
                 zStepsHalf = zStepsBuffer >> 1;
+                
+                //TODO: Set Dir GPIO
 
-//                TIMER2_Enable_Interrput();
+                TIMER2_Enable_Interrupt();
                 break;
             case enableStepper:
                 setStepperState(1);
@@ -133,7 +135,7 @@ void cnc_controller_depatch_task(void *pvParameters){
     }
 }
 
-void CNC_Move(uint32_t x, uint32_t y, uint32_t z){
+void CNC_Move(int32_t x, int32_t y, int32_t z){
     struct CNC_Operation_t operation;
     if(operationQueue == 0)
         return;

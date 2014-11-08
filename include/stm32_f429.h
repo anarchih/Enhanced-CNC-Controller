@@ -20,13 +20,15 @@ void init_button(void);
 
 void RCC_Configuration();
 void GPIO_Configuration();
+
+void TIMER2_Configuration(void);
+void TIMER2_Enable_Interrupt(void);
+void TIMER2_Disable_Interrupt(void);
+
 void USART1_Configuration();
 
 void enable_rs232_interrupts(void);
 
 void enable_rs232(void);
 
-void TIMER2_Configuration(void);
-void TIMER2_Enable_Interrupt();
-void TIMER2_Disable_Interrupt();
 #endif /* __STM32_F429_H */

@@ -8,6 +8,7 @@
 #include <string.h>
 #include "fio.h"
 #include "filesystem.h"
+#include "gcodeinter.h"
 
 typedef struct {
 	const char *name;

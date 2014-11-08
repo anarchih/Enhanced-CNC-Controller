@@ -113,11 +113,11 @@ $(OUTDIR)/%.o: %.s
 
 .PHONY: clean
 clean:
-	rm -rf $(OUTDIR) $(TMPDIR)
+	rm -rf $(OUTDIR) 
 
 .PHONY: clean-all
 clean-all:
-	rm -rf $(BUILDDIR) $(TMPDIR)
+	rm -rf $(BUILDDIR)
 
 -include $(DEP)
 

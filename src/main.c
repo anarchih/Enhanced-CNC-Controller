@@ -152,7 +152,9 @@ void system_logger(void *pvParameters)
 
 int main()
 {
-	init_rs232();
+    RCC_Configuration();
+    GPIO_Configuration();
+    USART1_Configuration();
 	enable_rs232_interrupts();
 	enable_rs232();
 	

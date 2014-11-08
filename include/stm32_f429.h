@@ -17,7 +17,10 @@ void init_button(void);
  * Note that the USART2 is not enabled in this routine.  It is left disabled in
  * case any additional configuration is needed.
  */
-void init_rs232(void);
+
+void RCC_Configuration();
+void GPIO_Configuration();
+void USART1_Configuration();
 
 void enable_rs232_interrupts(void);
 

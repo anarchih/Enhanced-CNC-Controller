@@ -9,7 +9,6 @@
 #include "fio.h"
 #include "filesystem.h"
 
-
 typedef struct {
 	const char *name;
 	cmdfunc *fptr;
@@ -26,7 +25,7 @@ void host_command(int, char **);
 void mmtest_command(int, char **);
 void test_command(int, char **);
 void test_ramfs_command(int, char **);
-
+void gcode_command(int, char **);
 #define MKCL(n, d) {.name=#n, .fptr=n ## _command, .desc=d}
 
 cmdlist cl[]={
@@ -39,6 +38,7 @@ cmdlist cl[]={
 	MKCL(help, "help"),
 	MKCL(test, "test new function"),
     MKCL(test_ramfs, "test ramfs"),
+    MKCL(gcode, "Enter gcode interpreter mode"),
 };
 
 int parse_command(char *str, char *argv[]){
@@ -252,6 +252,13 @@ void test_ramfs_command(int n, char *argv[]) {
     return;
 }
 
+void gcode_command(int n, char* argv[]){
+    char buf[128] = {'\0'};
+    while (strncmp(buf, "MO2", 3) != 0){
+        fio_read(0, buf, 127);
+        //ExcuteGCode(buf);
+    }
+}
 cmdfunc *do_command(const char *cmd){
 
 	int i;

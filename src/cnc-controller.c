@@ -224,15 +224,24 @@ void cnc_controller_depatch_task(void *pvParameters){
                 
                 rt = Q_rsqrt(xStepsBuffer * xStepsBuffer + yStepsBuffer * yStepsBuffer);
 
-                xAccelaration = 10 * (xStepsBuffer / (xStepsBuffer + yStepsBuffer));
+                xAccelaration = 10 * ((float)xStepsBuffer / (xStepsBuffer + yStepsBuffer));
                 xRealMaxSpeed = MovementSpeed * xStepsBuffer * rt;
                 xDeAccelarationPosition = (xRealMaxSpeed * xRealMaxSpeed / xAccelaration) / 2;
-                xAccelarationPosition = xStepsBuffer - (xRealMaxSpeed * xRealMaxSpeed / xAccelaration) / 2;
+                if(xDeAccelarationPosition > (xStepsBuffer >> 1))
+                    xDeAccelarationPosition = xStepsBuffer >> 1;
 
-                yAccelaration = 10 * (yStepsBuffer / (xStepsBuffer + yStepsBuffer));
+                xAccelarationPosition = xStepsBuffer - (xRealMaxSpeed * xRealMaxSpeed / xAccelaration) / 2;
+                if(xAccelarationPosition < (xStepsBuffer >> 1))
+                    xAccelarationPosition = xStepsBuffer >> 1;
+
+                yAccelaration = 10 * ((float)yStepsBuffer / (xStepsBuffer + yStepsBuffer));
                 yRealMaxSpeed = MovementSpeed * yStepsBuffer * rt;
                 yDeAccelarationPosition = (yRealMaxSpeed * yRealMaxSpeed / yAccelaration) / 2;
+                if(yDeAccelarationPosition > (yStepsBuffer >> 1))
+                    yDeAccelarationPosition = yStepsBuffer >> 1;
                 yAccelarationPosition = yStepsBuffer - (yRealMaxSpeed * yRealMaxSpeed / yAccelaration) / 2;
+                if(yAccelarationPosition < (yStepsBuffer >> 1))
+                    yAccelarationPosition = yStepsBuffer >> 1;
 
                 zStepsBuffer = (operation.parameter3 > 0) ? operation.parameter3 : (-1) *  operation.parameter3;
                 TIM_PrescalerConfig(TIM2, 5000 / xCurrSpeed, TIM_PSCReloadMode_Immediate);

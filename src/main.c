@@ -51,8 +51,7 @@ void USART1_IRQHandler()
 		char msg = USART_ReceiveData(USART1);
 
 		/* If there is an error when queueing the received byte, freeze! */
-		if(!xQueueSendToBackFromISR(serial_rx_queue, &msg, &xHigherPriorityTaskWoken))
-			while(1);
+		xQueueSendToBackFromISR(serial_rx_queue, &msg, &xHigherPriorityTaskWoken);
 	}
 	else {
 		/* Only transmit and receive interrupts should be enabled.
@@ -155,12 +154,15 @@ void system_logger(void *pvParameters)
 int main()
 {
     RCC_Configuration();
-    GPIO_Configuration();
+    GPIOA_Configuration();
+    GPIOG_Configuration();
     USART1_Configuration();
 	enable_rs232_interrupts();
 	enable_rs232();
     
-    TIMER2_Configuration();
+    GPIO_SetBits(GPIOG, GPIO_Pin_13);
+
+    //TIMER2_Configuration();
     cnc_controller_init();
 	
 	fs_init();
@@ -186,9 +188,9 @@ int main()
 	            "CLI",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
 
-	xTaskCreate(cnc_controller_depatch_task,
-	            "CNC",
-	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
+	//xTaskCreate(cnc_controller_depatch_task,
+	//            "CNC",
+	//            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
 #if 0
 	/* Create a task to record system log. */
 	xTaskCreate(system_logger,

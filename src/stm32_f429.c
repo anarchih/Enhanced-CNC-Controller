@@ -22,35 +22,32 @@ void RCC_Configuration(void)
 
 /**************************************************************************************/
  
-void GPIO_Configuration(void)
+void GPIOA_Configuration(void)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructureA;
 
     /*-------------------------- GPIO Configuration ----------------------------*/
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_InitStructureA.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10;
+    GPIO_InitStructureA.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStructureA.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructureA.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_InitStructureA.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructureA);
 
     /* Connect USART pins to AF */
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_USART1);   // USART1_TX
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);  // USART1_RX
-     
-    //Pins 13 and 14
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14;
-    //Mode output
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    //Output type push-pull
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    //Without pull resistors
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-    //50MHz pin speed
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-     
-    //Initialize pins on GPIOG port
-    GPIO_Init(GPIOG, &GPIO_InitStructure);
+}
+
+void GPIOG_Configuration(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructureG;
+    GPIO_InitStructureG.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14;
+    GPIO_InitStructureG.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructureG.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructureG.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_InitStructureG.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOG, &GPIO_InitStructureG);
 }
  
 /**************************************************************************************/
@@ -81,7 +78,7 @@ void USART1_Configuration(void)
 void init_rs232(void)
 {
     RCC_Configuration();
-    GPIO_Configuration();
+    GPIOA_Configuration();
     USART1_Configuration();
 }
 
@@ -96,6 +93,7 @@ void enable_rs232_interrupts(void)
     /* Enable the USART1 IRQ in the NVIC module (so that the USART1 interrupt
      * handler is enabled). */
     NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -113,20 +111,20 @@ void TIMER2_Configuration(void)
     NVIC_InitTypeDef NVIC_InitStructure;
     
     //TIMER 2 is on APB1 -> 84MHz
-    TIM_TimeBaseStructure.TIM_Period = 1 - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 8400 - 1;
+    TIM_TimeBaseStructure.TIM_Period = 8400 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 1000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
-    TIM_Cmd(TIM2, ENABLE);
+//    TIM_Cmd(TIM2, ENABLE);
 }
 
 void TIMER2_Enable_Interrupt(){

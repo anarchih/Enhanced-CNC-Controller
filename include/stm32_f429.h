@@ -19,7 +19,8 @@ void init_button(void);
  */
 
 void RCC_Configuration();
-void GPIO_Configuration();
+void GPIOA_Configuration();
+void GPIOG_Configuration();
 
 void TIMER2_Configuration(void);
 void TIMER2_Enable_Interrupt(void);

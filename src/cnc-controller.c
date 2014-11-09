@@ -83,9 +83,9 @@ void TIM2_IRQHandler(void){
 void  cnc_controller_init(void){
     operationQueue = xQueueCreate(256, sizeof(struct CNC_Operation_t));
     
-    stepperXMutex = xSemaphoreCreateMutex();
-    stepperYMutex = xSemaphoreCreateMutex();
-    stepperZMutex = xSemaphoreCreateMutex();
+    stepperXMutex = xSemaphoreCreateBinary();
+    stepperYMutex = xSemaphoreCreateBinary();
+    stepperZMutex = xSemaphoreCreateBinary();
 
     if((operationQueue == 0) || (stepperXMutex == NULL) || (stepperYMutex == NULL) || (stepperZMutex == NULL)){
         while(1); //Must be initilaized
@@ -108,13 +108,13 @@ void cnc_controller_depatch_task(void *pvParameters){
     }
 
     while(1){
-        xQueueReceive(operationQueue, &operation, 0);
+        xQueueReceive(operationQueue, &operation, portMAX_DELAY);
 
         switch(operation.opcodes){
             case moveStepper:
-                xSemaphoreTake(stepperXMutex, 0);
-                xSemaphoreTake(stepperYMutex, 0);
-                xSemaphoreTake(stepperZMutex, 0);
+                xSemaphoreTake(stepperXMutex, portMAX_DELAY);
+                xSemaphoreTake(stepperYMutex, portMAX_DELAY);
+                xSemaphoreTake(stepperZMutex, portMAX_DELAY);
 
                 xCurrSpeed = yCurrSpeed = zCurrSpeed = 10;
                 xStepsBuffer = (operation.parameter1 > 0) ? operation.parameter1 : (-1) *  operation.parameter1;
@@ -153,6 +153,6 @@ void CNC_Move(int32_t x, int32_t y, int32_t z){
     operation.parameter2 = y;
     operation.parameter3 = z;
 
-    xQueueSend(operationQueue, &operation, 0);
+    xQueueSend(operationQueue, &operation, portMAX_DELAY);
     return;
 }

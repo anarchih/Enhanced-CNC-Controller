@@ -1,6 +1,6 @@
 target extended-remote :3333
 file build/main/main.elf
-load
 monitor reset
 monitor halt
 
+b cnc-controller.c:83

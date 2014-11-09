@@ -5,6 +5,8 @@
 
 #include "cnc-controller.h"
 #include "stm32_f429.h"
+#include "fio.h"
+#include "clib.h"
 
 #include "stm32f4xx_gpio.h"
 
@@ -50,6 +52,8 @@ static void setStepperState(uint32_t state){
 
 
 void TIM2_IRQHandler(void){
+	static signed portBASE_TYPE xHigherPriorityTaskWoken;
+        
     if(TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)  {  
         TIM_ClearITPendingBit(TIM2, TIM_IT_Update);  
         if(timer2State){
@@ -59,27 +63,32 @@ void TIM2_IRQHandler(void){
             
             if(++timer2Count == xCurrSpeed){
                 timer2Count = 0;
-                if(xStepsBuffer > xStepsHalf)
+                if(xStepsBuffer > xStepsHalf){
                     xCurrSpeed += xAccelaration;
-                else
+                }else{
                     xCurrSpeed -= xAccelaration;
+               }
 
                 if(xCurrSpeed > xMaxSpeed)
                     xCurrSpeed = xMaxSpeed;
-                else if(xCurrSpeed < 0)
-                    xCurrSpeed = 0;
+                if(xCurrSpeed <= 0)
+                    xCurrSpeed = 1;
 
-                TIM_PrescalerConfig(TIM2, 10000 / xCurrSpeed, TIM_PSCReloadMode_Immediate);
+                TIM_PrescalerConfig(TIM2, 5000 / xCurrSpeed, TIM_PSCReloadMode_Update);
             }
         }else{
             GPIO_ResetBits(GPIOG, GPIO_Pin_13);
+            if(xStepsBuffer <= 0){
+                TIMER2_Disable_Interrupt();
+                TIM_ClearITPendingBit(TIM2, TIM_IT_Update);  
+                xSemaphoreGiveFromISR(stepperXMutex, &xHigherPriorityTaskWoken);
+
+                if (xHigherPriorityTaskWoken) {
+                    taskYIELD();
+                }
+            }
         }
         timer2State = !timer2State;
-
-        if(!xStepsBuffer){
-            TIMER2_Disable_Interrupt();
-            xSemaphoreGiveFromISR(stepperXMutex, NULL);
-        }
     }
 }
 
@@ -90,6 +99,10 @@ void  cnc_controller_init(void){
     stepperYMutex = xSemaphoreCreateBinary();
     stepperZMutex = xSemaphoreCreateBinary();
 
+    xSemaphoreGive(stepperXMutex);
+    xSemaphoreGive(stepperYMutex);
+    xSemaphoreGive(stepperZMutex);
+
     if((operationQueue == 0) || (stepperXMutex == NULL) || (stepperYMutex == NULL) || (stepperZMutex == NULL)){
         while(1); //Must be initilaized
     }
@@ -97,7 +110,7 @@ void  cnc_controller_init(void){
     timer2State = timer2Count = 0;
 
     xCurrSpeed = yCurrSpeed = zCurrSpeed = 1;
-    xMaxSpeed = yMaxSpeed = zMaxSpeed = 1000;
+    xMaxSpeed = yMaxSpeed = zMaxSpeed = 50;
     xStepsBuffer = yStepsBuffer = zStepsBuffer = 0;
 
     return;

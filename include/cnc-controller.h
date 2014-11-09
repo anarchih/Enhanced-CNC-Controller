@@ -5,9 +5,9 @@
 #include "queue.h"
 #include "semphr.h"
 
-#define xAccelaration 70 
-#define yAccelaration 70 
-#define zAccelaration 70 
+#define xAccelaration 10 
+#define yAccelaration 10 
+#define zAccelaration 10 
 
 #define xDefaultMaxSpeed 1000
 #define yDefaultMaxSpeed 1000

@@ -72,7 +72,7 @@ CFLAGS += -DUSER_NAME=\"$(USER)\"
 CFLAGS += -g -std=c99 -O0 -ffast-math
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -Wl,--gc-sections
-CFLAGS += -fno-common
+CFLAGS += -fno-common 
 CFLAGS += --param max-inline-insns-single=1000
 
 # specify STM32F429
@@ -80,7 +80,7 @@ CFLAGS += -DSTM32F429_439xx
 
 # to run from FLASH
 CFLAGS += -DVECT_TAB_FLASH
-LDFLAGS += -TCORTEX_M4F_STM32F4/stm32f429zi_flash.ld
+LDFLAGS +=  -TCORTEX_M4F_STM32F4/stm32f429zi_flash.ld
 
 # STM32F4xx_StdPeriph_Driver
 CFLAGS += -DUSE_STDPERIPH_DRIVER

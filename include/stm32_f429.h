@@ -23,8 +23,7 @@ void GPIOA_Configuration();
 void GPIOG_Configuration();
 
 void TIMER2_Configuration(void);
-void TIMER2_Enable_Interrupt(void);
-void TIMER2_Disable_Interrupt(void);
+void TIMER3_Configuration(void);
 
 void USART1_Configuration();
 

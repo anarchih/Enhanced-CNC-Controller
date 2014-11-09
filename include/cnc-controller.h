@@ -15,7 +15,7 @@
 
 
 enum CNC_Opcodes{
-    moveStepper = 0,
+    moveStepper = 1,
     setSpeed,
     enableStepper,
     disableStepper,

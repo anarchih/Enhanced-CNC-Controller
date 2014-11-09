@@ -124,7 +124,7 @@ void TIMER2_Configuration(void)
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
-//    TIM_Cmd(TIM2, ENABLE);
+    TIM_Cmd(TIM2, ENABLE);
 }
 
 void TIMER2_Enable_Interrupt(){

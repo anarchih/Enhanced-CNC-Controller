@@ -74,8 +74,10 @@ void TIM2_IRQHandler(void){
     }
     timer2State = !timer2State;
 
-    if(!xStepsBuffer)
+    if(!xStepsBuffer){
+        TIMER2_Disable_Interrupt();
         xSemaphoreGiveFromISR(stepperXMutex, NULL);
+    }
 
     return;
 }
@@ -113,8 +115,8 @@ void cnc_controller_depatch_task(void *pvParameters){
         switch(operation.opcodes){
             case moveStepper:
                 xSemaphoreTake(stepperXMutex, portMAX_DELAY);
-                xSemaphoreTake(stepperYMutex, portMAX_DELAY);
-                xSemaphoreTake(stepperZMutex, portMAX_DELAY);
+                //xSemaphoreTake(stepperYMutex, portMAX_DELAY);
+                //xSemaphoreTake(stepperZMutex, portMAX_DELAY);
 
                 xCurrSpeed = yCurrSpeed = zCurrSpeed = 10;
                 xStepsBuffer = (operation.parameter1 > 0) ? operation.parameter1 : (-1) *  operation.parameter1;

@@ -6,4 +6,4 @@ monitor halt
 
 b TIM2_IRQHandler
 b cnc-controller.c:115
-b CNC_Move
+b cnc-controller.c:121

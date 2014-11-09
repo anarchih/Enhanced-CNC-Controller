@@ -11,8 +11,6 @@
 #include "filesystem.h"
 #include "fio.h"
 //#include "romfs.h"
-#include "ramfs.h"
-#include "devfs.h"
 
 #include "clib.h"
 #include "shell.h"
@@ -169,9 +167,6 @@ int main()
 	fio_init();
     
     //register_fs(&ramfs_r);
-    register_devfs();
-    register_ramfs();
-    fs_mount(NULL, RAMFS_TYPE, NULL);
 
 //	register_romfs("romfs", &_sromfs);
 //	register_ramfs("ramfs");
@@ -188,9 +183,9 @@ int main()
 	            "CLI",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
 
-	//xTaskCreate(cnc_controller_depatch_task,
-	//            "CNC",
-	//            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
+	xTaskCreate(cnc_controller_depatch_task,
+	            "CNC",
+	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
 #if 0
 	/* Create a task to record system log. */
 	xTaskCreate(system_logger,

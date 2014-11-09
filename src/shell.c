@@ -16,7 +16,6 @@ typedef struct {
 	const char *desc;
 } cmdlist;
 
-void ls_command(int, char **);
 void man_command(int, char **);
 void cat_command(int, char **);
 void ps_command(int, char **);
@@ -25,12 +24,10 @@ void help_command(int, char **);
 void host_command(int, char **);
 void mmtest_command(int, char **);
 void test_command(int, char **);
-void test_ramfs_command(int, char **);
 void gcode_command(int, char **);
 #define MKCL(n, d) {.name=#n, .fptr=n ## _command, .desc=d}
 
 cmdlist cl[]={
-	MKCL(ls, "List directory"),
 	MKCL(man, "Show the manual of the command"),
 	MKCL(cat, "Concatenate files and print on the stdout"),
 	MKCL(ps, "Report a snapshot of the current processes"),
@@ -38,7 +35,6 @@ cmdlist cl[]={
 	MKCL(mmtest, "heap memory allocation test"),
 	MKCL(help, "help"),
 	MKCL(test, "test new function"),
-    MKCL(test_ramfs, "test ramfs"),
     MKCL(gcode, "Enter gcode interpreter mode"),
 };
 
@@ -63,70 +59,10 @@ int parse_command(char *str, char *argv[]){
 	return count;
 }
 
-void ls_command(int n, char *argv[]){
-    uint8_t listFlag = 0;
-    struct dir_entity ent;
-    int dir, c;
-
-    if(n == 1){
-		fio_printf(2, "\r\nUsage: ls [-l] [path...]\r\n");
-        return;
-    }
-    
-    for(int i = 0; i < n; i++){
-        if(argv[i][0] == '-'){
-            if(strcmp(argv[i], "-l") == 0){
-                listFlag = 1;
-            }else{
-                fio_printf(1, "\r\nUnsupported option %s\r\n", argv[i]);
-                return;
-            }
-        }
-    }
-     
-    for(int i = 1; i < n; i++){
-        if(argv[i][0] != '-'){
-            fio_printf(1, "\r\n");
-            dir = fio_opendir(argv[i]); //Treat last argv as path
-                        
-            for(c = 0; fio_readdir(dir, &ent) >= 0; c++);
-            fio_seekdir(dir, 0);
-
-            fio_printf(1, "%s:\r\n", argv[i]); 
-            fio_printf(1, "Total : %d\r\n", c);
-            for(c = 0; fio_readdir(dir, &ent) >= 0; c++){
-                if(!listFlag){
-                    fio_printf(1, "%s", ent.d_name);
-                    if(c > 5){
-                       fio_printf(1, "\r\n");
-                       c = -1;
-                    }
-                    else{
-                        fio_printf(1, "\t");
-                        c++;
-                    }
-                }else{
-
-                    char attrs[11] = "----------\0";
-                    if(ent.d_attr & 0x01)
-                        attrs[0] = 'd';
-                    fio_printf(1, "%s\t%s\r\n", attrs, ent.d_name);
-                }
-            }
-
-            if(c != 0)
-                fio_printf(1, "\r\n");
-            
-            fio_closedir(dir);
-        }
-    }
-    return;
-}
-
 int filedump(const char* filename){
 	char buf[128];
 
-	int fd=fio_open(filename, 0, O_RDONLY);
+	int fd=fs_open(filename, 0, O_RDONLY);
 
 	if(fd==OPENFAIL)
 		return 0;
@@ -227,30 +163,6 @@ void test_command(int n, char *argv[]) {
     }
 
     host_action(SYS_CLOSE, handle);
-}
-
-void test_ramfs_command(int n, char *argv[]) {
-    
-    int file;
-    char buf[16];
-
-    fio_printf(1, "\r\n");
-
-    fio_mkdir("/tmp/");
-    
-    file = fio_open("/tmp/test", 0, O_RDWR);
-
-    fio_write(file, "TEST!\0", 6);
-    
-    fio_seek(file, 0, SEEK_SET);
-
-    fio_read(file, buf, 6);
-
-    fio_printf(1, "%s\r\n", buf);
-
-    fio_close(file);
-
-    return;
 }
 
 void gcode_command(int n, char* argv[]){

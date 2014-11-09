@@ -48,38 +48,39 @@ static void setStepperState(uint32_t state){
     return;
 }
 
+
 void TIM2_IRQHandler(void){
-    GPIO_ToggleBits(GPIOG, GPIO_Pin_14);
-    if(timer2State){
-        GPIO_SetBits(GPIOG, GPIO_Pin_13);
+    if(TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)  {  
+        TIM_ClearITPendingBit(TIM2, TIM_IT_Update);  
+        if(timer2State){
+            GPIO_SetBits(GPIOG, GPIO_Pin_13);
 
-        xStepsBuffer--;
-        
-        if(++timer2Count == xCurrSpeed){
-            timer2Count = 0;
-            if(xStepsBuffer > xStepsHalf)
-                xCurrSpeed += xAccelaration;
-            else
-                xCurrSpeed -= xAccelaration;
+            xStepsBuffer--;
+            
+            if(++timer2Count == xCurrSpeed){
+                timer2Count = 0;
+                if(xStepsBuffer > xStepsHalf)
+                    xCurrSpeed += xAccelaration;
+                else
+                    xCurrSpeed -= xAccelaration;
 
-            if(xCurrSpeed > xMaxSpeed)
-                xCurrSpeed = xMaxSpeed;
-            else if(xCurrSpeed < 0)
-                xCurrSpeed = 0;
+                if(xCurrSpeed > xMaxSpeed)
+                    xCurrSpeed = xMaxSpeed;
+                else if(xCurrSpeed < 0)
+                    xCurrSpeed = 0;
 
-            TIM_PrescalerConfig(TIM2, 10000 / xCurrSpeed, TIM_PSCReloadMode_Immediate);
+                TIM_PrescalerConfig(TIM2, 10000 / xCurrSpeed, TIM_PSCReloadMode_Immediate);
+            }
+        }else{
+            GPIO_ResetBits(GPIOG, GPIO_Pin_13);
         }
-    }else{
-        GPIO_ResetBits(GPIOG, GPIO_Pin_13);
-    }
-    timer2State = !timer2State;
+        timer2State = !timer2State;
 
-    if(!xStepsBuffer){
-        TIMER2_Disable_Interrupt();
-        xSemaphoreGiveFromISR(stepperXMutex, NULL);
+        if(!xStepsBuffer){
+            TIMER2_Disable_Interrupt();
+            xSemaphoreGiveFromISR(stepperXMutex, NULL);
+        }
     }
-
-    return;
 }
 
 void  cnc_controller_init(void){
@@ -95,8 +96,8 @@ void  cnc_controller_init(void){
     
     timer2State = timer2Count = 0;
 
-    xCurrSpeed = yCurrSpeed = zCurrSpeed = 0;
-    xMaxSpeed = yMaxSpeed = zMaxSpeed = 30;
+    xCurrSpeed = yCurrSpeed = zCurrSpeed = 1;
+    xMaxSpeed = yMaxSpeed = zMaxSpeed = 1000;
     xStepsBuffer = yStepsBuffer = zStepsBuffer = 0;
 
     return;
@@ -118,15 +119,13 @@ void cnc_controller_depatch_task(void *pvParameters){
                 //xSemaphoreTake(stepperYMutex, portMAX_DELAY);
                 //xSemaphoreTake(stepperZMutex, portMAX_DELAY);
 
-                xCurrSpeed = yCurrSpeed = zCurrSpeed = 10;
+                xCurrSpeed = yCurrSpeed = zCurrSpeed = 1;
                 xStepsBuffer = (operation.parameter1 > 0) ? operation.parameter1 : (-1) *  operation.parameter1;
                 yStepsBuffer = (operation.parameter2 > 0) ? operation.parameter2 : (-1) *  operation.parameter2;
                 zStepsBuffer = (operation.parameter3 > 0) ? operation.parameter3 : (-1) *  operation.parameter3;
                 xStepsHalf = xStepsBuffer >> 1;
                 yStepsHalf = yStepsBuffer >> 1;
                 zStepsHalf = zStepsBuffer >> 1;
-                
-                
 
                 TIM_PrescalerConfig(TIM2, 10000 / xCurrSpeed, TIM_PSCReloadMode_Immediate);
                 TIMER2_Enable_Interrupt();

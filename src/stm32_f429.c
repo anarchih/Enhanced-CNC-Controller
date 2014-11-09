@@ -16,7 +16,7 @@ void RCC_Configuration(void)
       RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
       RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG, ENABLE);
       /* Timer 2 clock enable */
-      RCC_AHB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+      RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 }
 
 
@@ -93,7 +93,7 @@ void enable_rs232_interrupts(void)
     /* Enable the USART1 IRQ in the NVIC module (so that the USART1 interrupt
      * handler is enabled). */
     NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -111,16 +111,16 @@ void TIMER2_Configuration(void)
     NVIC_InitTypeDef NVIC_InitStructure;
     
     //TIMER 2 is on APB1 -> 84MHz
-    TIM_TimeBaseStructure.TIM_Period = 8400 - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 1000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = 4000 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 10000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 

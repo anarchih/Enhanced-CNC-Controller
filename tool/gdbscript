@@ -4,6 +4,3 @@ load
 monitor reset
 monitor halt
 
-b TIM2_IRQHandler
-b cnc-controller.c:115
-b cnc-controller.c:121

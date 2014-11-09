@@ -9,6 +9,7 @@
 #include "fio.h"
 #include "filesystem.h"
 #include "gcodeinter.h"
+#include "stm32f4xx_tim.h"
 
 typedef struct {
 	const char *name;
@@ -140,6 +141,8 @@ void help_command(int n,char *argv[]){
 	for(i=0;i<sizeof(cl)/sizeof(cl[0]); ++i){
 		fio_printf(1, "%s - %s\r\n", cl[i].name, cl[i].desc);
 	}
+
+	fio_printf(1, "\r\n %d \r\n", TIM_GetCounter(TIM3));
 }
 
 void test_command(int n, char *argv[]) {

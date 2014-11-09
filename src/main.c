@@ -149,6 +149,7 @@ void system_logger(void *pvParameters)
 }
 */
 
+
 int main()
 {
     RCC_Configuration();
@@ -160,16 +161,12 @@ int main()
     
     GPIO_SetBits(GPIOG, GPIO_Pin_13);
 
-    //TIMER2_Configuration();
+    TIMER2_Configuration();
     cnc_controller_init();
 	
 	fs_init();
 	fio_init();
     
-    //register_fs(&ramfs_r);
-
-//	register_romfs("romfs", &_sromfs);
-//	register_ramfs("ramfs");
 	
 	/* Create the queue used by the serial task.  Messages for write to
 	 * the RS232. */
@@ -198,6 +195,7 @@ int main()
 
 	return 0;
 }
+
 
 void vApplicationTickHook()
 {

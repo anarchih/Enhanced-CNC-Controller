@@ -64,17 +64,20 @@ void TIM2_IRQHandler(void){
             if(++timer2Count == xCurrSpeed){
                 timer2Count = 0;
                 if(xStepsBuffer > xStepsHalf){
-                    xCurrSpeed += xAccelaration;
+                    if(xCurrSpeed != xMaxSpeed){
+                        xCurrSpeed += xAccelaration;
+                        if(xCurrSpeed > xMaxSpeed)
+                            xCurrSpeed = xMaxSpeed;
+                        TIM_PrescalerConfig(TIM2, 5000 / xCurrSpeed, TIM_PSCReloadMode_Update);
+                    }
                 }else{
-                    xCurrSpeed -= xAccelaration;
-               }
-
-                if(xCurrSpeed > xMaxSpeed)
-                    xCurrSpeed = xMaxSpeed;
-                if(xCurrSpeed <= 0)
-                    xCurrSpeed = 1;
-
-                TIM_PrescalerConfig(TIM2, 5000 / xCurrSpeed, TIM_PSCReloadMode_Update);
+                    if(xCurrSpeed != 1){
+                        xCurrSpeed -= xAccelaration;
+                        if(xCurrSpeed <= 0)
+                            xCurrSpeed = 1;
+                        TIM_PrescalerConfig(TIM2, 5000 / xCurrSpeed, TIM_PSCReloadMode_Update);
+                    }   
+                }
             }
         }else{
             GPIO_ResetBits(GPIOG, GPIO_Pin_13);

@@ -1,6 +1,7 @@
 #include "stm32f4xx.h"
 #include "stm32_f429.h"
 #include "stm32f429i_discovery_lcd.h"
+#include "stm32f429i_discovery_ioe.h"
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"
@@ -19,6 +20,7 @@
 #include "host.h"
 
 #include "cnc-controller.h"
+#include "jogmode.h"
 
 /* _sromfs symbol can be found in main.ld linker script
  * it contains file system structure of test_romfs directory
@@ -173,8 +175,9 @@ int main()
     LCD_DrawRect(60, 235, 60, 120);
     LCD_DrawRect(30, 110, 100, 60);
     LCD_DrawRect(150, 110, 100, 60);
-//    LCD_DrawRect(60, 25, 60, 120);
 
+    IOE_Config();
+    IOE_TPITConfig();
 
     GPIO_SetBits(GPIOG, GPIO_Pin_13); //Logic Analyser Debug Trigger
 
@@ -199,6 +202,10 @@ int main()
 
 	xTaskCreate(CNC_controller_depatch_task,
 	            "CNC",
+	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
+
+	xTaskCreate(jogUI,
+	            "JOG",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
 #if 0
 	/* Create a task to record system log. */

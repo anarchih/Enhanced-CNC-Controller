@@ -14,7 +14,7 @@
 
 enum CNC_Opcodes{
     moveStepper = 1,
-    setSpeed,
+    setFeedrate,
     enableStepper,
     disableStepper,
     enableSpindle,
@@ -39,6 +39,7 @@ void  CNC_controller_init(void);
 void CNC_controller_depatch_task(void *pvParameters);
 
 void CNC_Move(int32_t x, int32_t y, int32_t z);
+void CNC_SetFeedrate(uint32_t feedrate);
 void CNC_EnableStepper();
 void CNC_DisableStepper();
 void CNC_EnableSpindle();

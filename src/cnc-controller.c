@@ -213,6 +213,16 @@ void CNC_Move(int32_t x, int32_t y, int32_t z){
     return;
 }
 
+void CNC_SetFeedrate(uint32_t feedrate){
+    struct CNC_Operation_t operation;
+    if(operationQueue == 0)
+        return;
+    operation.opcodes = setFeedrate;
+    operation.parameter1 = feedrate; //TODO : Consider using means of velocity
+    xQueueSend(operationQueue, &operation, portMAX_DELAY);
+    return;
+}
+
 void CNC_EnableStepper(){
     struct CNC_Operation_t operation;
     if(operationQueue == 0)

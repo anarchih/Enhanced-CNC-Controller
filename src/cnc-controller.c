@@ -55,6 +55,13 @@ static void setStepperState(uint32_t state){
     return;
 }
 
+static void updateFeedrate(uint32_t feedrate){
+    while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+    
+    TIM_PrescalerConfig(TIM2, 10000 / feedrate, TIM_PSCReloadMode_Update);
+    return;
+}
+
 void TIM2_IRQHandler(void){
     struct CNC_Movement_t movement;
     TickType_t xTaskWokenByReceive = pdFALSE;
@@ -145,6 +152,7 @@ uint8_t moveRelativly(int32_t x, int32_t y, int8_t z){
         for(i = z; i < 0; i++){
 		    InsertMove(0, 0, -1);
         }
+    }
 
 	return 0;
 }
@@ -167,7 +175,7 @@ void  CNC_controller_init(void){
     
     timer2State = 0;
 
-    StepperState = 1;
+    stepperState = 1;
     return;
 }
 
@@ -184,6 +192,9 @@ void CNC_controller_depatch_task(void *pvParameters){
         switch(operation.opcodes){
             case moveStepper:
                 moveRelativly(operation.parameter1, operation.parameter2, operation.parameter3);
+                break;
+            case setFeedrate:
+                updateFeedrate(operation.parameter1);
                 break;
             case enableStepper:
                 setStepperState(1);

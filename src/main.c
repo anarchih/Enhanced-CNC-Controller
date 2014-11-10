@@ -162,7 +162,7 @@ int main()
     GPIO_SetBits(GPIOG, GPIO_Pin_13);
 
     TIMER2_Configuration();
-    cnc_controller_init();
+    CNC_controller_init();
 	
 	fs_init();
 	fio_init();
@@ -180,7 +180,7 @@ int main()
 	            "CLI",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
 
-	xTaskCreate(cnc_controller_depatch_task,
+	xTaskCreate(CNC_controller_depatch_task,
 	            "CNC",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
 #if 0

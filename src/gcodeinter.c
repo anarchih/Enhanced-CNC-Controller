@@ -9,6 +9,7 @@ int abs_mode = 1;
 float curr_x = 0;
 float curr_y = 0;
 float curr_z = 0;
+float curr_v = 0;
 
 float atof(const char* s){
     float rez = 0, fact = 1;
@@ -29,7 +30,7 @@ float atof(const char* s){
     };
     return rez * fact;
 };
-void line_move(char gcode[], struct Exist *exist){
+void line_move(uint32_t gnum, char gcode[], struct Exist *exist){
     struct Vector v;
     int t = strlen(gcode);
     char tmp;
@@ -55,7 +56,17 @@ void line_move(char gcode[], struct Exist *exist){
     if(!exist->x)v.x = 0;
     if(!exist->y)v.y = 0;
     if(!exist->z)v.z = 0;
-    if(!exist->f)v.f = MAX_F;
+    
+    if(!gnum){
+        v.f = MAX_F;
+    }else{
+        if(!exist->f)
+            v.f = curr_v;
+    }
+    if(v.f != curr_v){
+        CNC_SetFeedrate(v.f);
+        curr_v = v.f;
+    }
     CNC_Move((int)(v.x/X_STEP_LENGTH), (int)(v.y/Y_STEP_LENGTH), (int)(v.z/Z_STEP_LENGTH));
     
     
@@ -138,12 +149,17 @@ void ExcuteGCode(char *gcode){
     struct Exist exist;
     // G00 G01 G02 G03 G90 G91 G92 M02 M03 M04 M17 M18 
     if (strncmp(gcode, "G00", 3) == 0 ||
-        strncmp(gcode, "G10", 3) == 0 ||
-        strncmp(gcode, "G0", 2) == 0 ||
+        strncmp(gcode, "G0", 2) == 0  ){
+
+        CheckExist(gcode, &exist);
+        line_move(0, gcode, &exist);
+    }
+
+    if( strncmp(gcode, "G01", 3) == 0 ||
         strncmp(gcode, "G1", 2) == 0  ){
 
         CheckExist(gcode, &exist);
-        line_move(gcode, &exist);
+        line_move(1, gcode, &exist);
     }
     
     if (strncmp(gcode, "G04", 3) == 0){

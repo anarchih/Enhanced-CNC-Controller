@@ -162,7 +162,6 @@ int main()
     GPIO_SetBits(GPIOG, GPIO_Pin_13);
 
     TIMER2_Configuration();
-    TIMER3_Configuration();
     cnc_controller_init();
 	
 	fs_init();

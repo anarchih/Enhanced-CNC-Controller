@@ -112,7 +112,7 @@ void TIMER2_Configuration(void)
     NVIC_InitTypeDef NVIC_InitStructure;
     
     //TIMER 2 is on APB1 -> 84MHz
-    TIM_TimeBaseStructure.TIM_Period = 4000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = 2400 - 1;
     TIM_TimeBaseStructure.TIM_Prescaler = 10000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -126,6 +126,7 @@ void TIMER2_Configuration(void)
     NVIC_Init(&NVIC_InitStructure);
 
     TIM_Cmd(TIM2, ENABLE);
+    TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
 }
 
 void TIMER3_Configuration(void)

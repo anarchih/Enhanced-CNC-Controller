@@ -28,6 +28,12 @@ struct CNC_Operation_t {
     int32_t parameter3;
 };
 
+struct CNC_Movement_t {
+    int8_t x;
+    int8_t y;
+    int8_t z;
+};
+
 void  cnc_controller_init(void);
 
 void cnc_controller_depatch_task(void *pvParameters);

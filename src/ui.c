@@ -38,7 +38,6 @@ static uint32_t isInRect(struct UI_Rect *rect, uint32_t point_x, uint32_t point_
 void mainUI(void *pvParameters){
     TP_STATE *tp;
     while(1){
-        LCD_Clear(LCD_COLOR_BLACK);
         drawRect(&btnJogMode);
 
         tp = IOE_TP_GetState(); 
@@ -55,9 +54,9 @@ void mainUI(void *pvParameters){
 
 void jogUI(void){
     TP_STATE *tp;
+    LCD_Clear(LCD_COLOR_BLACK);
 
     while(1){
-        LCD_Clear(LCD_COLOR_BLACK);
         drawRect(&btnXForward);
         drawRect(&btnXReverse);
         drawRect(&btnYForward);
@@ -94,7 +93,7 @@ void jogUI(void){
                 CNC_Move(0, 0, -20);
                 vTaskDelay(100 / portTICK_PERIOD_MS);
             }else if(isInRect(&btnExit, tp->X, tp->Y)){
-                GPIO_ToggleBits(GPIOG, GPIO_Pin_13);
+                LCD_Clear(LCD_COLOR_BLACK);
                 return;
             }
         }

@@ -1,5 +1,7 @@
 #include "stm32f4xx.h"
 #include "stm32_f429.h"
+#include "stm32f429i_discovery_lcd.h"
+
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -159,7 +161,14 @@ int main()
 	enable_rs232_interrupts();
 	enable_rs232();
     
-    GPIO_SetBits(GPIOG, GPIO_Pin_13);
+    LCD_Init();
+    LTDC_Cmd(ENABLE);
+
+    LCD_LayerInit();
+    LCD_SetLayer(LCD_FOREGROUND_LAYER);
+    LCD_Clear(LCD_COLOR_BLACK);
+
+    GPIO_SetBits(GPIOG, GPIO_Pin_13); //Logic Analyser Debug Trigger
 
     TIMER2_Configuration();
     CNC_controller_init();

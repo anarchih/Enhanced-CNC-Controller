@@ -36,7 +36,7 @@ INCDIR = include \
 SRCDIR = src \
       	 $(FREERTOS_SRC) \
     	 $(STDP)/Libraries/STM32F4xx_StdPeriph_Driver/src \
-#    	 $(STDP)/Utilities/STM32F429I-Discovery
+    	 $(STDP)/Utilities/STM32F429I-Discovery
 
 INCLUDES = $(addprefix -I,$(INCDIR))
 

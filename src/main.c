@@ -177,7 +177,7 @@ int main()
     LCD_DrawRect(150, 110, 100, 60);
 
     IOE_Config();
-    IOE_TPITConfig();
+    //IOE_TPITConfig();
 
     GPIO_SetBits(GPIOG, GPIO_Pin_13); //Logic Analyser Debug Trigger
 

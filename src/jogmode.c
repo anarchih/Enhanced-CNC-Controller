@@ -8,9 +8,9 @@
 
 static uint32_t isInRect(uint32_t x, uint32_t y, uint32_t Height, uint32_t Width, uint32_t point_x, uint32_t point_y){
     if((point_x > x) && \
-       (point_x < Width) && \
+       (point_x < x + Width) && \
        (point_y > y) && \
-       (point_y < Height)){
+       (point_y < y + Height)){
         return 1;
     }
     return 0;
@@ -30,10 +30,10 @@ void jogUI(void *pvParameters){
             }else if(isInRect(60, 235, 60, 120, tp->X, tp->Y)){
                 CNC_SetFeedrate(100);
                 CNC_Move(-20, 0, 0);
-            }else if(isInRect(30, 110, 60, 120, tp->X, tp->Y)){
+            }else if(isInRect(30, 110, 100, 60, tp->X, tp->Y)){
                 CNC_SetFeedrate(100);
                 CNC_Move(0, 20, 0);
-            }else if(isInRect(150, 110, 60, 120, tp->X, tp->Y)){
+            }else if(isInRect(150, 110, 100,60, tp->X, tp->Y)){
                 CNC_SetFeedrate(100);
                 CNC_Move(0, -20, 0);
             }

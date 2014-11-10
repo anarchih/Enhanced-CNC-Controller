@@ -4,5 +4,7 @@ load
 monitor reset
 monitor halt
 
-b cnc-controller.c:119
-b cnc-controller.c:100
+b jogmode.c:28
+b jogmode.c:31
+b jogmode.c:34
+b jogmode.c:37

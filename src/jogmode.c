@@ -2,6 +2,7 @@
 #include "stm32f4xx_gpio.h"
 #include "stm32f429i_discovery_ioe.h"
 #include "FreeRTOS.h"
+#include "task.h"
 
 #include "cnc-controller.h"
 #include "jogmode.h"
@@ -27,15 +28,19 @@ void jogUI(void *pvParameters){
             if(isInRect(60, 25, 60, 120, tp->X, tp->Y)){
                 CNC_SetFeedrate(100);
                 CNC_Move(20, 0, 0);
+                vTaskDelay(100 / portTICK_PERIOD_MS);
             }else if(isInRect(60, 235, 60, 120, tp->X, tp->Y)){
                 CNC_SetFeedrate(100);
                 CNC_Move(-20, 0, 0);
+                vTaskDelay(100 / portTICK_PERIOD_MS);
             }else if(isInRect(30, 110, 100, 60, tp->X, tp->Y)){
                 CNC_SetFeedrate(100);
                 CNC_Move(0, 20, 0);
+                vTaskDelay(100 / portTICK_PERIOD_MS);
             }else if(isInRect(150, 110, 100,60, tp->X, tp->Y)){
                 CNC_SetFeedrate(100);
                 CNC_Move(0, -20, 0);
+                vTaskDelay(100 / portTICK_PERIOD_MS);
             }
         }
     }

@@ -34,11 +34,15 @@ struct CNC_Movement_t {
     int8_t z;
 };
 
-void  cnc_controller_init(void);
+void  CNC_controller_init(void);
 
-void cnc_controller_depatch_task(void *pvParameters);
+void CNC_controller_depatch_task(void *pvParameters);
 
 void CNC_Move(int32_t x, int32_t y, int32_t z);
+void CNC_EnableStepper();
+void CNC_DisableStepper();
+void CNC_EnableSpindle();
+void CNC_DisableSpindle();
 
 
 #endif

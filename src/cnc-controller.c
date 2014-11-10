@@ -22,7 +22,8 @@ SemaphoreHandle_t stepperZMutex;
 uint32_t MovementSpeed;
 
 uint32_t timer2State;
-uint32_t timer2Count;
+
+uint32_t stepperState;
 
 float Q_rsqrt( float number )
 {
@@ -42,17 +43,15 @@ float Q_rsqrt( float number )
 }
 
 static void setStepperState(uint32_t state){
-    xSemaphoreTake(stepperXMutex, 0);
-    xSemaphoreTake(stepperYMutex, 0);
-    xSemaphoreTake(stepperZMutex, 0);
+    while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+
     if(state){
         //TODO: reset GPIO 
     }else{
         //TODO: Set GPIO
     }
-    xSemaphoreGive(stepperXMutex);
-    xSemaphoreGive(stepperYMutex);
-    xSemaphoreGive(stepperZMutex);
+    
+    stepperState = state;
     return;
 }
 
@@ -95,6 +94,9 @@ void InsertMove(int32_t x, int32_t y, int32_t z){
 /* Move tool base on relative position */
 /* no err = 0, else = 1*/
 uint8_t moveRelativly(int32_t x, int32_t y, int8_t z){
+    if(!stepperState)
+        return 1;
+
 	int32_t i, error_acc;
 
 	//Decide Direction of rotation
@@ -104,6 +106,12 @@ uint8_t moveRelativly(int32_t x, int32_t y, int8_t z){
 	//Take Absolute Value
 	x = x < 0 ? x * (-1) : x;
 	y = y < 0 ? y * (-1) : y;
+
+	if(z > 0){
+        for(i = 0; i < z; i++){
+		    InsertMove(0, 0, 1);
+        }
+    }
 
 	if(x == y){
 	    for(i = 0; i < x; i++){
@@ -133,13 +141,15 @@ uint8_t moveRelativly(int32_t x, int32_t y, int8_t z){
 		}
 	}
 
-	if(z)
-		InsertMove(0, 0, z > 0 ? 1 : -1);
+	if(z < 0){
+        for(i = z; i < 0; i++){
+		    InsertMove(0, 0, -1);
+        }
 
 	return 0;
 }
 
-void  cnc_controller_init(void){
+void  CNC_controller_init(void){
     operationQueue = xQueueCreate(256, sizeof(struct CNC_Operation_t));
     movementQueue = xQueueCreate(256, sizeof(struct CNC_Movement_t));
     
@@ -155,11 +165,13 @@ void  cnc_controller_init(void){
         while(1); //Must be initilaized
     }
     
-    timer2State = timer2Count = 0;
+    timer2State = 0;
+
+    StepperState = 1;
     return;
 }
 
-void cnc_controller_depatch_task(void *pvParameters){
+void CNC_controller_depatch_task(void *pvParameters){
     struct CNC_Operation_t operation;
     
     if((operationQueue == 0) || (movementQueue == 0) || (stepperXMutex == NULL) || (stepperYMutex == NULL) || (stepperZMutex == NULL)){

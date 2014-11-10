@@ -23,38 +23,6 @@ uint32_t MovementSpeed;
 
 uint32_t timer2State;
 uint32_t timer2Count;
-uint32_t timer3State;
-uint32_t timer3Count;
-
-uint32_t xStepsBuffer;
-uint32_t yStepsBuffer;
-uint32_t zStepsBuffer;
-uint32_t xStepsHalf;
-uint32_t yStepsHalf;
-uint32_t zStepsHalf;
-
-uint32_t xMaxSpeed;
-uint32_t yMaxSpeed;
-uint32_t zMaxSpeed;
-uint32_t xRealMaxSpeed;
-uint32_t yRealMaxSpeed;
-uint32_t zRealMaxSpeed;
-uint32_t xMinSpeed;
-uint32_t yMinSpeed;
-uint32_t zMinSpeed;
-int32_t xCurrSpeed;
-int32_t yCurrSpeed;
-int32_t zCurrSpeed;
-
-uint32_t xAccelaration;
-uint32_t yAccelaration;
-uint32_t zAccelaration;
-uint32_t xAccelarationPosition;
-uint32_t yAccelarationPosition;
-uint32_t zAccelarationPosition;
-uint32_t xDeAccelarationPosition;
-uint32_t yDeAccelarationPosition;
-uint32_t zDeAccelarationPosition;
 
 float Q_rsqrt( float number )
 {
@@ -113,9 +81,6 @@ void TIM2_IRQHandler(void){
         }
         timer2State = !timer2State;
     }
-}
-
-void TIM3_IRQHandler(void){
 }
 
 void InsertMove(int32_t x, int32_t y, int32_t z){
@@ -206,7 +171,6 @@ void cnc_controller_depatch_task(void *pvParameters){
 
         switch(operation.opcodes){
             case moveStepper:
-                TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
                 moveRelativly(operation.parameter1, operation.parameter2, operation.parameter3);
                 break;
             case enableStepper:

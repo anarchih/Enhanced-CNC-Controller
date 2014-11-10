@@ -167,6 +167,14 @@ int main()
     LCD_LayerInit();
     LCD_SetLayer(LCD_FOREGROUND_LAYER);
     LCD_Clear(LCD_COLOR_BLACK);
+    LCD_SetColors(LCD_COLOR_RED, LCD_COLOR_BLACK);
+
+    LCD_DrawRect(60, 25, 60, 120);
+    LCD_DrawRect(60, 235, 60, 120);
+    LCD_DrawRect(30, 110, 100, 60);
+    LCD_DrawRect(150, 110, 100, 60);
+//    LCD_DrawRect(60, 25, 60, 120);
+
 
     GPIO_SetBits(GPIOG, GPIO_Pin_13); //Logic Analyser Debug Trigger
 

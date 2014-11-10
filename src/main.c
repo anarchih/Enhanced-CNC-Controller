@@ -173,8 +173,10 @@ int main()
 
     LCD_DrawRect(60, 25, 60, 120);
     LCD_DrawRect(60, 235, 60, 120);
-    LCD_DrawRect(30, 110, 100, 60);
-    LCD_DrawRect(150, 110, 100, 60);
+    LCD_DrawRect(0, 110, 100, 50);
+    LCD_DrawRect(190, 110, 100, 50);
+    LCD_DrawRect(60, 95, 60, 120);
+    LCD_DrawRect(60, 165, 60, 120);
 
     IOE_Config();
     //IOE_TPITConfig();

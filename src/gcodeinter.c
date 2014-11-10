@@ -148,8 +148,8 @@ void CheckExist(char* gcode,struct Exist *exist){
 void ExcuteGCode(char *gcode){
     struct Exist exist;
     // G00 G01 G02 G03 G90 G91 G92 M02 M03 M04 M17 M18 
-    if (strncmp(gcode, "G00", 3) == 0 ||
-        strncmp(gcode, "G0", 2) == 0  ){
+    if (strncmp(gcode, "G00", 3) == 0){// ||
+        //strncmp(gcode, "G0", 2) == 0  ){ will sucks all other commands away
 
         CheckExist(gcode, &exist);
         line_move(0, gcode, &exist);

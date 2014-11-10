@@ -58,7 +58,7 @@ static void setStepperState(uint32_t state){
 static void updateFeedrate(uint32_t feedrate){
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
     
-    TIM_PrescalerConfig(TIM2, 10000 / feedrate, TIM_PSCReloadMode_Update);
+    TIM_PrescalerConfig(TIM2, 10000 / feedrate, TIM_PSCReloadMode_Immediate);
     return;
 }
 

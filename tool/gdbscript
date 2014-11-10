@@ -4,4 +4,5 @@ load
 monitor reset
 monitor halt
 
-b cnc-controller.c:227
+b cnc-controller.c:119
+b cnc-controller.c:100

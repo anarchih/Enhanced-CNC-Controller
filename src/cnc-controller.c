@@ -13,6 +13,7 @@
 #define INCLUDE_vTaskSuspend 1
 
 QueueHandle_t   operationQueue;
+QueueHandle_t   movementQueue;
 
 SemaphoreHandle_t stepperXMutex;
 SemaphoreHandle_t stepperYMutex;
@@ -88,96 +89,94 @@ static void setStepperState(uint32_t state){
 }
 
 void TIM2_IRQHandler(void){
-	static signed portBASE_TYPE xHigherPriorityTaskWoken;
-        
-    if(TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)  {  
-        TIM_ClearITPendingBit(TIM2, TIM_IT_Update);  
-        if(timer2State){
-            GPIO_SetBits(GPIOG, GPIO_Pin_13);
+    struct CNC_Movement_t movement;
+    TickType_t xTaskWokenByReceive = pdFALSE;
 
-            xStepsBuffer--;
-            
-            if(++timer2Count == xCurrSpeed){
-                timer2Count = 0;
-                if(xStepsBuffer <= xDeAccelarationPosition){
-                    if(xCurrSpeed > xAccelaration){
-                        xCurrSpeed -= xAccelaration;
-                        if(xCurrSpeed <= xAccelaration)
-                            xCurrSpeed = xAccelaration;
-                        TIM_PrescalerConfig(TIM2, 5000 / xCurrSpeed, TIM_PSCReloadMode_Update);
-                    }
-                }else if(xStepsBuffer >= xAccelarationPosition){
-                    if(xCurrSpeed < xRealMaxSpeed){
-                        xCurrSpeed += xAccelaration;
-                        if(xCurrSpeed > xRealMaxSpeed)
-                            xCurrSpeed = xRealMaxSpeed;
-                        TIM_PrescalerConfig(TIM2, 5000 / xCurrSpeed, TIM_PSCReloadMode_Update);
-                    }
+    if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET){
+        TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update);
+
+        if(timer2State){
+            if(xQueueReceive( movementQueue, &movement, xTaskWokenByReceive) != pdFALSE){
+                if(movement.x && movement.y)
+                   GPIO_SetBits(GPIOG, GPIO_Pin_13 | GPIO_Pin_14);
+                else if(movement.x)
+                   GPIO_SetBits(GPIOG, GPIO_Pin_13);
+                else if(movement.y)
+                   GPIO_SetBits(GPIOG, GPIO_Pin_14);
+
+                if( xTaskWokenByReceive != pdFALSE ){
+                    portYIELD_FROM_ISR( xTaskWokenByReceive );
                 }
             }
         }else{
-            GPIO_ResetBits(GPIOG, GPIO_Pin_13);
-            if(xStepsBuffer <= 0){
-                TIM_ITConfig(TIM2, TIM_IT_Update, DISABLE);
-                TIM_ClearITPendingBit(TIM2, TIM_IT_Update);  
-                xSemaphoreGiveFromISR(stepperXMutex, &xHigherPriorityTaskWoken);
-
-                if (xHigherPriorityTaskWoken) {
-                    taskYIELD();
-                }
-            }
+            GPIO_ResetBits(GPIOG, GPIO_Pin_13 | GPIO_Pin_14);
         }
         timer2State = !timer2State;
     }
 }
 
 void TIM3_IRQHandler(void){
-	static signed portBASE_TYPE xHigherPriorityTaskWoken;
-        
-    if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)  {  
-        TIM_ClearITPendingBit(TIM3, TIM_IT_Update);  
-        if(timer3State){
-            GPIO_SetBits(GPIOG, GPIO_Pin_14);
-
-            yStepsBuffer--;
-            
-            if(++timer3Count == yCurrSpeed){
-                timer3Count = 0;
-                if(yStepsBuffer <= yDeAccelarationPosition){
-                    if(yCurrSpeed > yAccelaration){
-                        yCurrSpeed -= yAccelaration;
-                        if(yCurrSpeed <= yAccelaration)
-                            yCurrSpeed = yAccelaration;
-                        TIM_PrescalerConfig(TIM3, 5000 / yCurrSpeed, TIM_PSCReloadMode_Update);
-                    }
-                }else if(yStepsBuffer >= yAccelarationPosition){
-                    if(yCurrSpeed < yRealMaxSpeed){
-                        yCurrSpeed += yAccelaration;
-                        if(yCurrSpeed > yRealMaxSpeed)
-                            yCurrSpeed = yRealMaxSpeed;
-                        TIM_PrescalerConfig(TIM3, 5000 / yCurrSpeed, TIM_PSCReloadMode_Update);
-                    }
-                }
-            }
-        }else{
-            GPIO_ResetBits(GPIOG, GPIO_Pin_14);
-            if(yStepsBuffer <= 0){
-                TIM_ITConfig(TIM3, TIM_IT_Update, DISABLE);
-                TIM_ClearITPendingBit(TIM3, TIM_IT_Update);  
-                xSemaphoreGiveFromISR(stepperYMutex, &xHigherPriorityTaskWoken);
-
-                if (xHigherPriorityTaskWoken) {
-                    taskYIELD();
-                }
-            }
-        }
-        timer3State = !timer3State;
-    }
 }
 
+void InsertMove(int32_t x, int32_t y, int32_t z){
+    struct CNC_Movement_t movement;
+    movement.x = x;
+    movement.y = y;
+    movement.z = z;
+    xQueueSend( movementQueue, &movement, portMAX_DELAY );
+    return;
+}
+
+/* Move tool base on relative position */
+/* no err = 0, else = 1*/
+uint8_t moveRelativly(int32_t x, int32_t y, int8_t z){
+	int32_t i, error_acc;
+
+	//Decide Direction of rotation
+	int8_t xDirection = x < 0 ? -1 : 1;
+	int8_t yDirection = y < 0 ? -1 : 1;
+
+	//Take Absolute Value
+	x = x < 0 ? x * (-1) : x;
+	y = y < 0 ? y * (-1) : y;
+
+	if(x == y){
+	    for(i = 0; i < x; i++){
+	      InsertMove(xDirection, yDirection, 0);
+	    }
+	}else if(x > y){
+		error_acc = x / 2;
+	    for(i = 0; i < x; i++){
+			error_acc -= y;
+			if(error_acc < 0){
+				error_acc += x;
+				InsertMove(xDirection, yDirection, 0);
+			}else{
+				InsertMove(xDirection, 0, 0);
+			}
+	    }
+	}else{
+		error_acc = y / 2;
+		for(i = 0; i < y; i++){
+			error_acc -= x;
+			if(error_acc < 0){
+				error_acc += y;
+				InsertMove(xDirection, yDirection, 0);
+			}else{
+				InsertMove(0, yDirection, 0);
+			}
+		}
+	}
+
+	if(z)
+		InsertMove(0, 0, z > 0 ? 1 : -1);
+
+	return 0;
+}
 
 void  cnc_controller_init(void){
     operationQueue = xQueueCreate(256, sizeof(struct CNC_Operation_t));
+    movementQueue = xQueueCreate(256, sizeof(struct CNC_Movement_t));
     
     stepperXMutex = xSemaphoreCreateBinary();
     stepperYMutex = xSemaphoreCreateBinary();
@@ -187,24 +186,18 @@ void  cnc_controller_init(void){
     xSemaphoreGive(stepperYMutex);
     xSemaphoreGive(stepperZMutex);
 
-    if((operationQueue == 0) || (stepperXMutex == NULL) || (stepperYMutex == NULL) || (stepperZMutex == NULL)){
+    if((operationQueue == 0) || (movementQueue == 0) || (stepperXMutex == NULL) || (stepperYMutex == NULL) || (stepperZMutex == NULL)){
         while(1); //Must be initilaized
     }
     
     timer2State = timer2Count = 0;
-
-    xCurrSpeed = yCurrSpeed = zCurrSpeed = 1;
-    MovementSpeed = 30;
-    xStepsBuffer = yStepsBuffer = zStepsBuffer = 0;
-
     return;
 }
 
 void cnc_controller_depatch_task(void *pvParameters){
     struct CNC_Operation_t operation;
-    float rt;
     
-    if((operationQueue == 0) || (stepperXMutex == NULL) || (stepperYMutex == NULL) || (stepperZMutex == NULL)){
+    if((operationQueue == 0) || (movementQueue == 0) || (stepperXMutex == NULL) || (stepperYMutex == NULL) || (stepperZMutex == NULL)){
         return;
     }
 
@@ -213,41 +206,8 @@ void cnc_controller_depatch_task(void *pvParameters){
 
         switch(operation.opcodes){
             case moveStepper:
-                xSemaphoreTake(stepperXMutex, portMAX_DELAY);
-                xSemaphoreTake(stepperYMutex, portMAX_DELAY);
-                //xSemaphoreTake(stepperZMutex, portMAX_DELAY);
-
-                xCurrSpeed = yCurrSpeed = zCurrSpeed = 1;
-                
-                xStepsBuffer = (operation.parameter1 > 0) ? operation.parameter1 : (-1) *  operation.parameter1;
-                yStepsBuffer = (operation.parameter2 > 0) ? operation.parameter2 : (-1) *  operation.parameter2;
-                
-                rt = Q_rsqrt(xStepsBuffer * xStepsBuffer + yStepsBuffer * yStepsBuffer);
-
-                xAccelaration = 10 * ((float)xStepsBuffer / (xStepsBuffer + yStepsBuffer));
-                xRealMaxSpeed = MovementSpeed * xStepsBuffer * rt;
-                xDeAccelarationPosition = (xRealMaxSpeed * xRealMaxSpeed / xAccelaration) / 2;
-                if(xDeAccelarationPosition > (xStepsBuffer >> 1))
-                    xDeAccelarationPosition = xStepsBuffer >> 1;
-
-                xAccelarationPosition = xStepsBuffer - (xRealMaxSpeed * xRealMaxSpeed / xAccelaration) / 2;
-                if(xAccelarationPosition < (xStepsBuffer >> 1))
-                    xAccelarationPosition = xStepsBuffer >> 1;
-
-                yAccelaration = 10 * ((float)yStepsBuffer / (xStepsBuffer + yStepsBuffer));
-                yRealMaxSpeed = MovementSpeed * yStepsBuffer * rt;
-                yDeAccelarationPosition = (yRealMaxSpeed * yRealMaxSpeed / yAccelaration) / 2;
-                if(yDeAccelarationPosition > (yStepsBuffer >> 1))
-                    yDeAccelarationPosition = yStepsBuffer >> 1;
-                yAccelarationPosition = yStepsBuffer - (yRealMaxSpeed * yRealMaxSpeed / yAccelaration) / 2;
-                if(yAccelarationPosition < (yStepsBuffer >> 1))
-                    yAccelarationPosition = yStepsBuffer >> 1;
-
-                zStepsBuffer = (operation.parameter3 > 0) ? operation.parameter3 : (-1) *  operation.parameter3;
-                TIM_PrescalerConfig(TIM2, 5000 / xCurrSpeed, TIM_PSCReloadMode_Immediate);
-                TIM_PrescalerConfig(TIM3, 5000 / yCurrSpeed, TIM_PSCReloadMode_Immediate);
                 TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
-                TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+                moveRelativly(operation.parameter1, operation.parameter2, operation.parameter3);
                 break;
             case enableStepper:
                 setStepperState(1);

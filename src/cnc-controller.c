@@ -212,3 +212,39 @@ void CNC_Move(int32_t x, int32_t y, int32_t z){
     xQueueSend(operationQueue, &operation, portMAX_DELAY);
     return;
 }
+
+void CNC_EnableStepper(){
+    struct CNC_Operation_t operation;
+    if(operationQueue == 0)
+        return;
+    operation.opcodes = enableStepper; 
+    xQueueSend(operationQueue, &operation, portMAX_DELAY);
+    return;
+}
+
+void CNC_DisableStepper(){
+    struct CNC_Operation_t operation;
+    if(operationQueue == 0)
+        return;
+    operation.opcodes = disableStepper; 
+    xQueueSend(operationQueue, &operation, portMAX_DELAY);
+    return;
+}
+
+void CNC_EnableSpindle(){
+    struct CNC_Operation_t operation;
+    if(operationQueue == 0)
+        return;
+    operation.opcodes = enableSpindle; 
+    xQueueSend(operationQueue, &operation, portMAX_DELAY);
+    return;
+}
+
+void CNC_DisableSpindle(){
+    struct CNC_Operation_t operation;
+    if(operationQueue == 0)
+        return;
+    operation.opcodes = disableSpindle; 
+    xQueueSend(operationQueue, &operation, portMAX_DELAY);
+    return;
+}

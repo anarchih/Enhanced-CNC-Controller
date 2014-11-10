@@ -20,7 +20,7 @@
 #include "host.h"
 
 #include "cnc-controller.h"
-#include "jogmode.h"
+#include "ui.h"
 
 /* _sromfs symbol can be found in main.ld linker script
  * it contains file system structure of test_romfs directory
@@ -158,6 +158,8 @@ int main()
 {
     RCC_Configuration();
     GPIOA_Configuration();
+    GPIOB_Configuration();
+    GPIOC_Configuration();
     GPIOG_Configuration();
     USART1_Configuration();
 	enable_rs232_interrupts();
@@ -171,17 +173,13 @@ int main()
     LCD_Clear(LCD_COLOR_BLACK);
     LCD_SetColors(LCD_COLOR_RED, LCD_COLOR_BLACK);
 
-    LCD_DrawRect(60, 25, 60, 120);
-    LCD_DrawRect(60, 235, 60, 120);
-    LCD_DrawRect(0, 110, 100, 50);
-    LCD_DrawRect(190, 110, 100, 50);
-    LCD_DrawRect(60, 95, 60, 120);
-    LCD_DrawRect(60, 165, 60, 120);
 
     IOE_Config();
     //IOE_TPITConfig();
 
     GPIO_SetBits(GPIOG, GPIO_Pin_13); //Logic Analyser Debug Trigger
+    GPIO_ToggleBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_11 | GPIO_Pin_10); //Logic Analyser Debug Trigger
+    GPIO_ToggleBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_11 | GPIO_Pin_10); //Logic Analyser Debug Trigger
 
     TIMER2_Configuration();
     CNC_controller_init();
@@ -206,7 +204,7 @@ int main()
 	            "CNC",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
 
-	xTaskCreate(jogUI,
+	xTaskCreate(mainUI,
 	            "JOG",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
 #if 0

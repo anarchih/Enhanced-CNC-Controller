@@ -72,18 +72,22 @@ void TIM2_IRQHandler(void){
         if(timer2State){
             if(xQueueReceive( movementQueue, &movement, xTaskWokenByReceive) != pdFALSE){
                 if(movement.x && movement.y)
-                   GPIO_SetBits(GPIOG, GPIO_Pin_13 | GPIO_Pin_14);
+                   GPIO_SetBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_14);
                 else if(movement.x)
-                   GPIO_SetBits(GPIOG, GPIO_Pin_13);
+                   GPIO_SetBits(GPIOB, GPIO_Pin_12);
                 else if(movement.y)
-                   GPIO_SetBits(GPIOG, GPIO_Pin_14);
+                   GPIO_SetBits(GPIOB, GPIO_Pin_14);
+
+                if(movement.z){
+                    GPIO_SetBits(GPIOB, GPIO_Pin_15);
+                }
 
                 if( xTaskWokenByReceive != pdFALSE ){
                     portYIELD_FROM_ISR( xTaskWokenByReceive );
                 }
             }
         }else{
-            GPIO_ResetBits(GPIOG, GPIO_Pin_13 | GPIO_Pin_14);
+            GPIO_ResetBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_14 | GPIO_Pin_15);
         }
         timer2State = !timer2State;
     }
@@ -100,7 +104,7 @@ void InsertMove(int32_t x, int32_t y, int32_t z){
 
 /* Move tool base on relative position */
 /* no err = 0, else = 1*/
-uint8_t moveRelativly(int32_t x, int32_t y, int8_t z){
+uint8_t moveRelativly(int32_t x, int32_t y, int32_t z){
     if(!stepperState)
         return 1;
 

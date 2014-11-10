@@ -4,7 +4,4 @@ load
 monitor reset
 monitor halt
 
-b jogmode.c:28
-b jogmode.c:31
-b jogmode.c:34
-b jogmode.c:37
+b jogmode.c:44

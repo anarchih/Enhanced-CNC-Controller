@@ -14,6 +14,7 @@ void RCC_Configuration(void)
       RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
       /* GPIO clock enable */
       RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+      RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
       RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG, ENABLE);
       /* Timers clock enable */
       RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
@@ -40,10 +41,32 @@ void GPIOA_Configuration(void)
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);  // USART1_RX
 }
 
+void GPIOB_Configuration(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructureB;
+    GPIO_InitStructureB.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_11 | GPIO_Pin_10; 
+    GPIO_InitStructureB.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructureB.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructureB.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_InitStructureB.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOB, &GPIO_InitStructureB);
+}
+
+void GPIOC_Configuration(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructureC;
+    GPIO_InitStructureC.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12; 
+    GPIO_InitStructureC.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructureC.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructureC.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_InitStructureC.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOC, &GPIO_InitStructureC);
+}
+
 void GPIOG_Configuration(void)
 {
     GPIO_InitTypeDef GPIO_InitStructureG;
-    GPIO_InitStructureG.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14;
+    GPIO_InitStructureG.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14; 
     GPIO_InitStructureG.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStructureG.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructureG.GPIO_PuPd = GPIO_PuPd_NOPULL;

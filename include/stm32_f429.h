@@ -20,6 +20,8 @@ void init_button(void);
 
 void RCC_Configuration();
 void GPIOA_Configuration();
+void GPIOB_Configuration();
+void GPIOC_Configuration();
 void GPIOG_Configuration();
 
 void TIMER2_Configuration(void);

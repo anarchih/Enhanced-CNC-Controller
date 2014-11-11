@@ -33,18 +33,27 @@ struct UI_Btn btnYForward;
 struct UI_Btn btnYReverse;
 struct UI_Btn btnZForward;
 struct UI_Btn btnZReverse;
+struct UI_Btn btnXFYF;
+struct UI_Btn btnXRYR;
+struct UI_Btn btnXRYF;
+struct UI_Btn btnXFYR;
 struct UI_Btn btnExit;
 
 static void init(){
     SET_BTN(btnJogMode, 25, 25, 50, 50, "JOG");
 
-    SET_BTN(btnXForward, 25, 25, 50, 50, "X+");
-    SET_BTN(btnXReverse, 165, 25, 50, 50, "X-");
+    SET_BTN(btnXFYF, 25, 25, 50, 50, "X+Y+");
+    SET_BTN(btnXFYR, 165, 25, 50, 50, "X+Y-");
+    SET_BTN(btnXRYF, 25, 175, 50, 50, "X-Y+");
+    SET_BTN(btnXRYR, 165, 175, 50, 50, "X-Y-");
+
+    SET_BTN(btnXForward, 95, 25, 50, 50, "X+");
+    SET_BTN(btnXReverse, 95, 175, 50, 50, "X-");
     SET_BTN(btnYForward, 25, 100, 50, 50, "Y+");
     SET_BTN(btnYReverse, 165, 100, 50, 50, "Y-");
-    SET_BTN(btnZForward, 25, 175, 50, 50, "Z+");
-    SET_BTN(btnZReverse, 165, 175, 50, 50, "Z-");
-    SET_BTN(btnExit, 165, 245, 50, 50, "BACK");
+    SET_BTN(btnZForward, 25, 245, 50, 50, "Z+");
+    SET_BTN(btnZReverse, 165, 245, 50, 50, "Z-");
+    SET_BTN(btnExit, 95, 245, 50, 50, "BACK");
 }
 
 
@@ -53,11 +62,6 @@ static void drawBtn(struct UI_Btn *btn){
     new_LCD_DisplayStringLine((btn->rect.y + btn->rect.height + 4),
             btn->rect.x + ((btn->rect.width - (LCD_GetFont()->Width * strlen(btn->name))) / 2),
             (uint8_t*) btn->name);
-}
-
-static void drawRect(struct UI_Rect *rect){
-    LCD_DrawRect(rect->x, rect->y, rect->height, rect->width);
-    return;
 }
 
 static uint32_t isInRect(struct UI_Rect *rect, uint32_t point_x, uint32_t point_y){
@@ -104,26 +108,32 @@ static int jogUI_handleInput()
 
     if( tp->TouchDetected ){
         if(isInRect(&btnXForward.rect, tp->X, tp->Y)){
+            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
             CNC_SetFeedrate(100);
             CNC_Move(20, 0, 0);
             vTaskDelay(100 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnXReverse.rect, tp->X, tp->Y)){
+            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
             CNC_SetFeedrate(100);
             CNC_Move(-20, 0, 0);
             vTaskDelay(100 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnYForward.rect, tp->X, tp->Y)){
+            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
             CNC_SetFeedrate(100);
             CNC_Move(0, 20, 0);
             vTaskDelay(100 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnYReverse.rect, tp->X, tp->Y)){
+            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
             CNC_SetFeedrate(100);
             CNC_Move(0, -20, 0);
             vTaskDelay(100 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnZForward.rect, tp->X, tp->Y)){
+            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
             CNC_SetFeedrate(100);
             CNC_Move(0, 0, 20);
             vTaskDelay(100 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnZReverse.rect, tp->X, tp->Y)){
+            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
             CNC_SetFeedrate(100);
             CNC_Move(0, 0, -20);
             vTaskDelay(100 / portTICK_PERIOD_MS);
@@ -143,6 +153,12 @@ static void jogUI_render()
 
     new_LCD_DisplayStringLine(4, 70, (uint8_t*) "JOG MODE");
 
+    drawBtn(&btnXFYF);
+    drawBtn(&btnXRYR);
+    drawBtn(&btnXFYR);
+    drawBtn(&btnXRYF);
+    drawBtn(&btnZForward);
+    drawBtn(&btnZReverse);
     drawBtn(&btnXForward);
     drawBtn(&btnXReverse);
     drawBtn(&btnYForward);

@@ -46,8 +46,8 @@ void GPIOA_Configuration(void)
 void GPIOB_Configuration(void)
 {
     GPIO_InitTypeDef GPIO_InitStructureB;
-    GPIO_InitStructureB.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14; 
-    GPIO_InitStructureB.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructureB.GPIO_Pin = GPIO_Pin_4; 
+    GPIO_InitStructureB.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStructureB.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructureB.GPIO_PuPd = GPIO_PuPd_NOPULL;
     GPIO_InitStructureB.GPIO_Speed = GPIO_Speed_50MHz;
@@ -178,30 +178,23 @@ void PWM_Init(void) {
     pulse_length = ((TIM_Period + 1) * DutyCycle) / 100 - 1
 */
     TIM_OCStruct.TIM_Pulse = 0;
-    TIM_OC1Init(TIM2, &TIM_OCStruct);
-    TIM_OC1PreloadConfig(TIM2, TIM_OCPreload_Enable);
+    TIM_OC1Init(TIM3, &TIM_OCStruct);
+    TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
 
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, GPIO_AF_TIM2);
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource4, GPIO_AF_TIM3);
 }
 
 void TIMER3_Configuration(void)
 {
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
     
     //TIMER 2 is on APB1 -> 84MHz
-    TIM_TimeBaseStructure.TIM_Period = 4000 - 1;
-    TIM_TimeBaseStructure.TIM_Prescaler = 10000 - 1;
+    TIM_TimeBaseStructure.TIM_Period = 2400 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 100 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
     TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
-
-    NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
 
     TIM_Cmd(TIM3, ENABLE);
 }

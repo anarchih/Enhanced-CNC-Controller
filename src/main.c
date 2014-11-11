@@ -181,6 +181,7 @@ int main()
     //GPIO_ToggleBits(GPIOC, GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13); //Logic Analyser Debug Trigger
 
     TIMER2_Configuration();
+    TIMER3_Configuration();
     PWM_Init();
     CNC_controller_init();
 	

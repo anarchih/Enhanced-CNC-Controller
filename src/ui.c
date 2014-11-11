@@ -230,14 +230,14 @@ static int spindleUI_handleInput()
     if( tp->TouchDetected ){
         if(isInRect(&btnSpeedUp.rect, tp->X, tp->Y)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CurrentSpindleSpeed += 5;
+            CurrentSpindleSpeed += 10;
             if(CurrentSpindleSpeed > 100)
                 CurrentSpindleSpeed = 100;
             CNC_SetSpindleSpeed(CurrentSpindleSpeed);
             vTaskDelay(100 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnSpeedDown.rect, tp->X, tp->Y)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CurrentSpindleSpeed += 5;
+            CurrentSpindleSpeed -= 10;
             if(CurrentSpindleSpeed < 0)
                 CurrentSpindleSpeed = 0;
             CNC_SetSpindleSpeed(CurrentSpindleSpeed);

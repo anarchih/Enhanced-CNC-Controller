@@ -48,7 +48,7 @@ static void updateSpindleSpeed(uint32_t speed){
     if(speed > 100)
         speed = 100;
 
-    TIM_SetCompare1(TIM2, 2400 * speed / 100 - 1);
+    TIM_SetCompare1(TIM3, 2400 * speed / 100);
     return;
 }
 

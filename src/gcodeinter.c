@@ -2,6 +2,7 @@
 #include "gcodeinter.h"
 #include "cnc-controller.h"
 #define MAX_F 100.0
+#define MAX_A 1
 #define X_STEP_LENGTH 1.0
 #define Y_STEP_LENGTH 1.0
 #define Z_STEP_LENGTH 1.0
@@ -10,7 +11,6 @@ float curr_x = 0;
 float curr_y = 0;
 float curr_z = 0;
 float curr_v = 0;
-
 float atof(const char* s){
     float rez = 0, fact = 1;
     if (*s == '-'){
@@ -68,8 +68,7 @@ void line_move(uint32_t gnum, char gcode[], struct Exist *exist){
         curr_v = v.f;
     }
     CNC_Move((int)(v.x/X_STEP_LENGTH), (int)(v.y/Y_STEP_LENGTH), (int)(v.z/Z_STEP_LENGTH));
-    
-    
+     
 }/*
 void G02(char gcode[], struct Exist *exist){
     struct XYZ_Vector v;
@@ -153,28 +152,28 @@ void ExcuteGCode(char *gcode){
 
         CheckExist(gcode, &exist);
         line_move(0, gcode, &exist);
-    }
-
-    if( strncmp(gcode, "G01", 3) == 0 ||
+    }else if( strncmp(gcode, "G01", 3) == 0 ||
         strncmp(gcode, "G1", 2) == 0  ){
 
         CheckExist(gcode, &exist);
         line_move(1, gcode, &exist);
-    }
-    
-    if (strncmp(gcode, "G04", 3) == 0){
+    }else if (strncmp(gcode, "G04", 3) == 0){
 
-    }
-    if (strncmp(gcode, "G90", 3) == 0){
+    }else if (strncmp(gcode, "G90", 3) == 0){
         abs_mode = 1;
-    }
-    if (strncmp(gcode, "G91", 3) == 0){
+    }else if (strncmp(gcode, "G91", 3) == 0){
         abs_mode = 0;
-    }    
-    if (strncmp(gcode, "M03", 3) == 0){
-
+    }else if (strncmp(gcode, "M03", 3) == 0){
+        CNC_EnableSpindle();
+    }else if (strncmp(gcode, "M04", 3) == 0){
+        CNC_DisableSpindle();
+    }else if (strncmp(gcode, "M17", 3) == 0){
+        CNC_EnableStepper();
+    }else if (strncmp(gcode, "M18", 3) == 0){
+        CNC_DisableStepper();
     }
 }
+
 
 /*
 int main(){

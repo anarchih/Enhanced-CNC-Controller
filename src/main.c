@@ -158,9 +158,9 @@ int main()
 {
     RCC_Configuration();
     GPIOA_Configuration();
-    GPIOB_Configuration();
     GPIOC_Configuration();
     GPIOG_Configuration();
+    GPIOE_Configuration();
     USART1_Configuration();
 	enable_rs232_interrupts();
 	enable_rs232();
@@ -173,13 +173,11 @@ int main()
     LCD_Clear(LCD_COLOR_BLACK);
     LCD_SetColors(LCD_COLOR_RED, LCD_COLOR_BLACK);
 
-
     IOE_Config();
-    //IOE_TPITConfig();
 
     GPIO_SetBits(GPIOG, GPIO_Pin_13); //Logic Analyser Debug Trigger
-    GPIO_ToggleBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_11 | GPIO_Pin_10); //Logic Analyser Debug Trigger
-    GPIO_ToggleBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_11 | GPIO_Pin_10); //Logic Analyser Debug Trigger
+    //GPIO_SetBits(GPIOC, GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13); //Logic Analyser Debug Trigger
+    //GPIO_ToggleBits(GPIOC, GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13); //Logic Analyser Debug Trigger
 
     TIMER2_Configuration();
     CNC_controller_init();
@@ -205,7 +203,7 @@ int main()
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
 
 	xTaskCreate(mainUI,
-	            "JOG",
+	            "UI",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
 #if 0
 	/* Create a task to record system log. */

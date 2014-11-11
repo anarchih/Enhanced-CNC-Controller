@@ -23,6 +23,7 @@ void GPIOA_Configuration();
 void GPIOB_Configuration();
 void GPIOC_Configuration();
 void GPIOG_Configuration();
+void GPIOE_Configuration();
 
 void TIMER2_Configuration(void);
 void TIMER3_Configuration(void);

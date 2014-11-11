@@ -71,15 +71,33 @@ void TIM2_IRQHandler(void){
 
         if(timer2State){
             if(xQueueReceive( movementQueue, &movement, xTaskWokenByReceive) != pdFALSE){
+                if(movement.x > 0){
+                    GPIO_SetBits(GPIOC, GPIO_Pin_11);
+                }else{
+                    GPIO_ResetBits(GPIOC, GPIO_Pin_11);
+                }
+
+                if(movement.y > 0){
+                    GPIO_SetBits(GPIOC, GPIO_Pin_12);
+                }else{
+                    GPIO_ResetBits(GPIOC, GPIO_Pin_12);
+                }
+
+                if(movement.z > 0){
+                    GPIO_SetBits(GPIOC, GPIO_Pin_13);
+                }else{
+                    GPIO_ResetBits(GPIOC, GPIO_Pin_13);
+                }
+
                 if(movement.x && movement.y)
-                   GPIO_SetBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_14);
+                   GPIO_SetBits(GPIOE, GPIO_Pin_2 | GPIO_Pin_3);
                 else if(movement.x)
-                   GPIO_SetBits(GPIOB, GPIO_Pin_12);
+                   GPIO_SetBits(GPIOE, GPIO_Pin_2);
                 else if(movement.y)
-                   GPIO_SetBits(GPIOB, GPIO_Pin_14);
+                   GPIO_SetBits(GPIOE, GPIO_Pin_3);
 
                 if(movement.z){
-                    GPIO_SetBits(GPIOB, GPIO_Pin_15);
+                    GPIO_SetBits(GPIOE, GPIO_Pin_4);
                 }
 
                 if( xTaskWokenByReceive != pdFALSE ){
@@ -87,7 +105,7 @@ void TIM2_IRQHandler(void){
                 }
             }
         }else{
-            GPIO_ResetBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_14 | GPIO_Pin_15);
+            GPIO_ResetBits(GPIOE, GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4);
         }
         timer2State = !timer2State;
     }
@@ -184,6 +202,8 @@ void  CNC_controller_init(void){
 }
 
 void CNC_controller_depatch_task(void *pvParameters){
+    GPIO_ToggleBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_11 | GPIO_Pin_10); //Logic Analyser Debug Trigger
+    GPIO_ToggleBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_11 | GPIO_Pin_10); //Logic Analyser Debug Trigger
     struct CNC_Operation_t operation;
     
     if((operationQueue == 0) || (movementQueue == 0) || (stepperXMutex == NULL) || (stepperYMutex == NULL) || (stepperZMutex == NULL)){

@@ -8,6 +8,8 @@
 #include "cnc-controller.h"
 #include "ui.h"
 
+extern QueueHandle_t   operationQueue;
+
 /* main UI */
 struct UI_Rect btnJogMode = {25, 25, 50, 50};
 
@@ -69,26 +71,32 @@ void jogUI(void){
 
         if( tp->TouchDetected ){
             if(isInRect(&btnXForward, tp->X, tp->Y)){
+                while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
                 CNC_SetFeedrate(100);
                 CNC_Move(20, 0, 0);
                 vTaskDelay(100 / portTICK_PERIOD_MS);
             }else if(isInRect(&btnXReverse, tp->X, tp->Y)){
+                while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
                 CNC_SetFeedrate(100);
                 CNC_Move(-20, 0, 0);
                 vTaskDelay(100 / portTICK_PERIOD_MS);
             }else if(isInRect(&btnYForward, tp->X, tp->Y)){
+                while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
                 CNC_SetFeedrate(100);
                 CNC_Move(0, 20, 0);
                 vTaskDelay(100 / portTICK_PERIOD_MS);
             }else if(isInRect(&btnYReverse, tp->X, tp->Y)){
+                while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
                 CNC_SetFeedrate(100);
                 CNC_Move(0, -20, 0);
                 vTaskDelay(100 / portTICK_PERIOD_MS);
             }else if(isInRect(&btnZForward, tp->X, tp->Y)){
+                while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
                 CNC_SetFeedrate(100);
                 CNC_Move(0, 0, 20);
                 vTaskDelay(100 / portTICK_PERIOD_MS);
             }else if(isInRect(&btnZReverse, tp->X, tp->Y)){
+                while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
                 CNC_SetFeedrate(100);
                 CNC_Move(0, 0, -20);
                 vTaskDelay(100 / portTICK_PERIOD_MS);

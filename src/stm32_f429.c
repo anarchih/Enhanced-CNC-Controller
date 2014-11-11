@@ -31,7 +31,7 @@ void GPIOA_Configuration(void)
     GPIO_InitTypeDef GPIO_InitStructureA;
 
     /*-------------------------- GPIO Configuration ----------------------------*/
-    GPIO_InitStructureA.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10;
+    GPIO_InitStructureA.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_9 | GPIO_Pin_10;
     GPIO_InitStructureA.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStructureA.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructureA.GPIO_PuPd = GPIO_PuPd_NOPULL;
@@ -163,6 +163,25 @@ void TIMER2_Configuration(void)
 
     TIM_Cmd(TIM2, ENABLE);
     TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+}
+
+void PWM_Init(void) {
+    TIM_OCInitTypeDef TIM_OCStruct;
+    
+    /* PWM mode 2 = Clear on compare match */
+    /* PWM mode 1 = Set on compare match */
+    TIM_OCStruct.TIM_OCMode = TIM_OCMode_PWM2;
+    TIM_OCStruct.TIM_OutputState = TIM_OutputState_Enable;
+    TIM_OCStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
+    
+/*
+    pulse_length = ((TIM_Period + 1) * DutyCycle) / 100 - 1
+*/
+    TIM_OCStruct.TIM_Pulse = 1200 - 1;
+    TIM_OC1Init(TIM2, &TIM_OCStruct);
+    TIM_OC1PreloadConfig(TIM2, TIM_OCPreload_Enable);
+
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, GPIO_AF_TIM2);
 }
 
 void TIMER3_Configuration(void)

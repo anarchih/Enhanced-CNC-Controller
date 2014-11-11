@@ -67,13 +67,15 @@ static void setStepperState(uint32_t state){
 static void updateFeedrate(uint32_t feedrate){
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
     
-    TIM_PrescalerConfig(TIM2, 10000 / feedrate, TIM_PSCReloadMode_Immediate);
+    TIM_PrescalerConfig(TIM2, 10000 / feedrate, TIM_PSCReloadMode_Update);
     return;
 }
 
 void TIM2_IRQHandler(void){
     struct CNC_Movement_t movement;
     TickType_t xTaskWokenByReceive = pdFALSE;
+
+    GPIO_ToggleBits(GPIOG, GPIO_Pin_13);
 
     if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET){
         TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update);
@@ -86,7 +88,7 @@ void TIM2_IRQHandler(void){
                     GPIO_ResetBits(DirPinPort, XDirPin);
                 }
 
-                if(movement.y > 0){
+                if(movement.y < 0){
                     GPIO_SetBits(DirPinPort, YDirPin);
                 }else{
                     GPIO_ResetBits(DirPinPort, YDirPin);

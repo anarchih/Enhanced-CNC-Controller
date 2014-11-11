@@ -41,6 +41,7 @@ struct UI_Btn btnXFYF;
 struct UI_Btn btnXRYR;
 struct UI_Btn btnXRYF;
 struct UI_Btn btnXFYR;
+struct UI_Btn btnFast;
 
 /* Spindle UI */
 struct UI_Btn btnSpeedUp;
@@ -58,6 +59,7 @@ static void init(){
     SET_BTN(btnXRYF, 25, 175, 50, 50, "X-Y+");
     SET_BTN(btnXRYR, 165, 175, 50, 50, "X-Y-");
     SET_BTN(btnXForward, 95, 25, 50, 50, "X+");
+    SET_BTN(btnFast, 95, 100, 50, 50, "F / S");
     SET_BTN(btnXReverse, 95, 175, 50, 50, "X-");
     SET_BTN(btnYForward, 25, 100, 50, 50, "Y+");
     SET_BTN(btnYReverse, 165, 100, 50, 50, "Y-");
@@ -122,58 +124,70 @@ static void mainUI_render()
 
 static int jogUI_handleInput()
 {
+    static uint32_t settedSpeed = 200;
+    static uint32_t movementAmount = 20;
     tp = IOE_TP_GetState(); 
 
     if( tp->TouchDetected ){
         if(isInRect(&btnXForward.rect, tp->X, tp->Y)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(100);
-            CNC_Move(20, 0, 0);
-            vTaskDelay(100 / portTICK_PERIOD_MS);
+            CNC_SetFeedrate(settedSpeed);
+            CNC_Move(movementAmount, 0, 0);
+            vTaskDelay(50 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnXReverse.rect, tp->X, tp->Y)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(100);
-            CNC_Move(-20, 0, 0);
-            vTaskDelay(100 / portTICK_PERIOD_MS);
+            CNC_SetFeedrate(settedSpeed);
+            CNC_Move((-1) * movementAmount, 0, 0);
+            vTaskDelay(50 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnYForward.rect, tp->X, tp->Y)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(100);
-            CNC_Move(0, 20, 0);
-            vTaskDelay(100 / portTICK_PERIOD_MS);
+            CNC_SetFeedrate(settedSpeed);
+            CNC_Move(0, movementAmount, 0);
+            vTaskDelay(50 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnYReverse.rect, tp->X, tp->Y)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(100);
-            CNC_Move(0, -20, 0);
-            vTaskDelay(100 / portTICK_PERIOD_MS);
+            CNC_SetFeedrate(settedSpeed);
+            CNC_Move(0, (-1) * movementAmount, 0);
+            vTaskDelay(50 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnXFYF.rect, tp->X, tp->Y)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(100);
-            CNC_Move(20, 20, 0);
-            vTaskDelay(100 / portTICK_PERIOD_MS);
+            CNC_SetFeedrate(settedSpeed);
+            CNC_Move(movementAmount, movementAmount, 0);
+            vTaskDelay(50 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnXFYR.rect, tp->X, tp->Y)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(100);
-            CNC_Move(20, -20, 0);
-            vTaskDelay(100 / portTICK_PERIOD_MS);
+            CNC_SetFeedrate(settedSpeed);
+            CNC_Move(movementAmount, (-1) * movementAmount, 0);
+            vTaskDelay(50 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnXRYF.rect, tp->X, tp->Y)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(100);
-            CNC_Move(-20, 20, 0);
-            vTaskDelay(100 / portTICK_PERIOD_MS);
+            CNC_SetFeedrate(settedSpeed);
+            CNC_Move((-1) * movementAmount, movementAmount, 0);
+            vTaskDelay(50 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnXRYR.rect, tp->X, tp->Y)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(100);
-            CNC_Move(-20, -20, 0);
-            vTaskDelay(100 / portTICK_PERIOD_MS);
+            CNC_SetFeedrate(settedSpeed);
+            CNC_Move((-1) * movementAmount, -movementAmount, 0);
+            vTaskDelay(50 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnZForward.rect, tp->X, tp->Y)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(100);
-            CNC_Move(0, 0, 20);
-            vTaskDelay(100 / portTICK_PERIOD_MS);
+            CNC_SetFeedrate(settedSpeed);
+            CNC_Move(0, 0, movementAmount);
+            vTaskDelay(50 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnZReverse.rect, tp->X, tp->Y)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(100);
-            CNC_Move(0, 0, -20);
+            CNC_SetFeedrate(settedSpeed);
+            CNC_Move(0, 0, (-1) * movementAmount);
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+        }else if(isInRect(&btnFast.rect, tp->X, tp->Y)){
+            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+            if(settedSpeed == 200){
+                settedSpeed = 600; 
+                movementAmount = 100;
+            }else{
+                settedSpeed = 200; 
+                movementAmount = 20;
+            }
             vTaskDelay(100 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnExit.rect, tp->X, tp->Y)){
             return 1;
@@ -195,6 +209,7 @@ static void jogUI_render()
     drawBtn(&btnXRYR);
     drawBtn(&btnXFYR);
     drawBtn(&btnXRYF);
+    drawBtn(&btnFast);
     drawBtn(&btnZForward);
     drawBtn(&btnZReverse);
     drawBtn(&btnXForward);

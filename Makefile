@@ -65,7 +65,7 @@ LDFLAGS += -L $(call get_library_path,libgcc.a)
 
 # Basic configurations
 CFLAGS += -g3 -std=c99
-CFLAGS += -Wall -Werror
+CFLAGS += -Wall
 CFLAGS += -DUSER_NAME=\"$(USER)\"
 
 # Optimizations

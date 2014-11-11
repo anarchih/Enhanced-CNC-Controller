@@ -96,20 +96,19 @@ void command_prompt(void *pvParameters)
     char hint[] = USER_NAME "@" USER_NAME "-STM32:~$ ";
 
 	fio_printf(1, "\rWelcome to FreeRTOS Shell\r\n");
-	while(1){
-                fio_printf(1, "%s", hint);
-		fio_read(0, buf, 127);
-	
-		int n=parse_command(buf, argv);
+    while(1){
+        fio_printf(1, "%s", hint);
+        fio_read(0, buf, 127);
 
-		/* will return pointer to the command function */
-		cmdfunc *fptr=do_command(argv[0]);
-		if(fptr!=NULL)
-			fptr(n, argv);
-		else
-			fio_printf(2, "\r\n\"%s\" command not found.\r\n", argv[0]);
-	}
+        int n=parse_command(buf, argv);
 
+        /* will return pointer to the command function */
+        cmdfunc *fptr=do_command(argv[0]);
+        if(fptr!=NULL)
+            fptr(n, argv);
+        else
+            fio_printf(2, "\r\n\"%s\" command not found.\r\n", argv[0]);
+    }
 }
 
 /*
@@ -169,9 +168,11 @@ int main()
     LTDC_Cmd(ENABLE);
 
     LCD_LayerInit();
-    LCD_SetLayer(LCD_FOREGROUND_LAYER);
-    LCD_Clear(LCD_COLOR_BLACK);
     LCD_SetColors(LCD_COLOR_RED, LCD_COLOR_BLACK);
+    LCD_SetLayer(LCD_BACKGROUND_LAYER);
+    LCD_SetTransparency(0xff);
+    LCD_SetLayer(LCD_FOREGROUND_LAYER);
+    LCD_SetTransparency(0x00);
 
 
     IOE_Config();
@@ -207,6 +208,7 @@ int main()
 	xTaskCreate(mainUI,
 	            "JOG",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
+
 #if 0
 	/* Create a task to record system log. */
 	xTaskCreate(system_logger,

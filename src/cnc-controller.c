@@ -42,11 +42,20 @@ float Q_rsqrt( float number )
     return y;
 }
 
+static void updateSpindleSpeed(uint32_t speed){
+    while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+    
+    if(speed > 100)
+        speed = 100;
+
+    TIM_SetCompare1(TIM2, 2400 * speed / 100 - 1);
+    return;
+}
+
 static void setStepperState(uint32_t state){
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
 
     if(state){
-        //TODO: reset GPIO 
     }else{
         //TODO: Set GPIO
     }
@@ -226,9 +235,8 @@ void CNC_controller_depatch_task(void *pvParameters){
             case disableStepper:
                 setStepperState(0);
                 break;
-            case enableSpindle:
-                break;
-            case disableSpindle:
+            case setSpindleSpeed:
+                updateSpindleSpeed(operation.parameter1);
                 break;
         } 
     }
@@ -276,20 +284,12 @@ void CNC_DisableStepper(){
     return;
 }
 
-void CNC_EnableSpindle(){
+void CNC_SetSpindleSpeed(uint32_t speed){
     struct CNC_Operation_t operation;
     if(operationQueue == 0)
         return;
-    operation.opcodes = enableSpindle; 
-    xQueueSend(operationQueue, &operation, portMAX_DELAY);
-    return;
-}
-
-void CNC_DisableSpindle(){
-    struct CNC_Operation_t operation;
-    if(operationQueue == 0)
-        return;
-    operation.opcodes = disableSpindle; 
+    operation.opcodes = setSpindleSpeed;
+    operation.parameter1 = speed; 
     xQueueSend(operationQueue, &operation, portMAX_DELAY);
     return;
 }

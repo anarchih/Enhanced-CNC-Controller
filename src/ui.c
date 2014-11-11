@@ -22,10 +22,13 @@
 static TP_STATE *tp;
 static const portTickType xDelay = (1000.0 / 20.0) / portTICK_PERIOD_MS;
 
+int32_t CurrentSpindleSpeed = 0;
+
 extern QueueHandle_t   operationQueue;
 
 /* main UI */
 struct UI_Btn btnJogMode;
+struct UI_Btn btnSpindleSetting;
 
 /* jog UI */
 struct UI_Btn btnXForward;
@@ -38,22 +41,32 @@ struct UI_Btn btnXFYF;
 struct UI_Btn btnXRYR;
 struct UI_Btn btnXRYF;
 struct UI_Btn btnXFYR;
+
+/* Spindle UI */
+struct UI_Btn btnSpeedUp;
+struct UI_Btn btnSpeedDown;
+
+/* Sharing UI */
 struct UI_Btn btnExit;
 
 static void init(){
     SET_BTN(btnJogMode, 25, 25, 50, 50, "JOG");
+    SET_BTN(btnSpindleSetting, 125, 25, 50, 50, "Spindle");
 
     SET_BTN(btnXFYF, 25, 25, 50, 50, "X+Y+");
     SET_BTN(btnXFYR, 165, 25, 50, 50, "X+Y-");
     SET_BTN(btnXRYF, 25, 175, 50, 50, "X-Y+");
     SET_BTN(btnXRYR, 165, 175, 50, 50, "X-Y-");
-
     SET_BTN(btnXForward, 95, 25, 50, 50, "X+");
     SET_BTN(btnXReverse, 95, 175, 50, 50, "X-");
     SET_BTN(btnYForward, 25, 100, 50, 50, "Y+");
     SET_BTN(btnYReverse, 165, 100, 50, 50, "Y-");
     SET_BTN(btnZForward, 25, 245, 50, 50, "Z+");
     SET_BTN(btnZReverse, 165, 245, 50, 50, "Z-");
+
+    SET_BTN(btnSpeedUp, 95, 25, 50, 50, "SpeedUp");
+    SET_BTN(btnSpeedDown, 95, 175, 50, 50, "SlowDown");
+
     SET_BTN(btnExit, 95, 245, 50, 50, "BACK");
 }
 
@@ -86,8 +99,11 @@ static void mainUI_handleInput()
     tp = IOE_TP_GetState(); 
 
     if( tp->TouchDetected ){
-        if(isInRect(&btnJogMode.rect, tp->X, tp->Y))
+        if(isInRect(&btnJogMode.rect, tp->X, tp->Y)){
             jogUI();
+        }else if(isInRect(&btnSpindleSetting.rect, tp->X, tp->Y)){
+            spindleUI();
+        }
     }
 }
 
@@ -97,6 +113,7 @@ static void mainUI_render()
 
     LCD_SetTextColor(LCD_COLOR_RED);
     drawBtn(&btnJogMode);
+    drawBtn(&btnSpindleSetting);
 
     new_LCD_DisplayStringLine(4, 55, (uint8_t*) "SELECT MODE");
 
@@ -191,8 +208,48 @@ static void jogUI_render()
     new_Present();
 }
 
-void mainUI(void *pvParameters){
+static void spindleUI_render()
+{
+    clear();
 
+    LCD_SetTextColor(LCD_COLOR_RED);
+
+    new_LCD_DisplayStringLine(4, 70, (uint8_t*) "SPINDLE");
+
+    drawBtn(&btnSpeedUp);
+    drawBtn(&btnSpeedDown);
+    drawBtn(&btnExit);
+
+    new_Present();
+}
+
+static int spindleUI_handleInput()
+{
+    tp = IOE_TP_GetState(); 
+
+    if( tp->TouchDetected ){
+        if(isInRect(&btnSpeedUp.rect, tp->X, tp->Y)){
+            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+            CurrentSpindleSpeed += 5;
+            if(CurrentSpindleSpeed > 100)
+                CurrentSpindleSpeed = 100;
+            CNC_SetSpindleSpeed(CurrentSpindleSpeed);
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+        }else if(isInRect(&btnSpeedDown.rect, tp->X, tp->Y)){
+            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+            CurrentSpindleSpeed += 5;
+            if(CurrentSpindleSpeed < 0)
+                CurrentSpindleSpeed = 0;
+            CNC_SetSpindleSpeed(CurrentSpindleSpeed);
+            vTaskDelay(xDelay);
+        }else if(isInRect(&btnExit.rect, tp->X, tp->Y)){
+            return 1;
+        }
+    } 
+    return 0;
+}
+
+void mainUI(void *pvParameters){
     LCD_SetFont(&Font12x12);
     init();
 
@@ -201,7 +258,7 @@ void mainUI(void *pvParameters){
         mainUI_render();
 
         vTaskDelay(xDelay);
-    } 
+    }
 }
 
 void jogUI(void){
@@ -211,6 +268,21 @@ void jogUI(void){
         back = jogUI_handleInput();
 
         jogUI_render();
+
+        if (back)
+            return;
+
+        vTaskDelay(xDelay);
+    }
+}
+
+void spindleUI(void){
+    uint8_t back = 0;
+
+    while(1){
+        back = spindleUI_handleInput();
+
+        spindleUI_render();
 
         if (back)
             return;

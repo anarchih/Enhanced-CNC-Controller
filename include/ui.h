@@ -15,5 +15,6 @@ struct UI_Btn{
 
 void mainUI(void *pvParameters);
 void jogUI();
+void spindleUI();
  
 #endif //__JOGMODE__

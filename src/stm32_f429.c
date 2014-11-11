@@ -177,7 +177,7 @@ void PWM_Init(void) {
 /*
     pulse_length = ((TIM_Period + 1) * DutyCycle) / 100 - 1
 */
-    TIM_OCStruct.TIM_Pulse = 1200 - 1;
+    TIM_OCStruct.TIM_Pulse = 0;
     TIM_OC1Init(TIM2, &TIM_OCStruct);
     TIM_OC1PreloadConfig(TIM2, TIM_OCPreload_Enable);
 

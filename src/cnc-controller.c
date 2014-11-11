@@ -72,32 +72,32 @@ void TIM2_IRQHandler(void){
         if(timer2State){
             if(xQueueReceive( movementQueue, &movement, xTaskWokenByReceive) != pdFALSE){
                 if(movement.x > 0){
-                    GPIO_SetBits(GPIOC, GPIO_Pin_11);
+                    GPIO_SetBits(DirPinPort, XDirPin);
                 }else{
-                    GPIO_ResetBits(GPIOC, GPIO_Pin_11);
+                    GPIO_ResetBits(DirPinPort, XDirPin);
                 }
 
                 if(movement.y > 0){
-                    GPIO_SetBits(GPIOC, GPIO_Pin_12);
+                    GPIO_SetBits(DirPinPort, YDirPin);
                 }else{
-                    GPIO_ResetBits(GPIOC, GPIO_Pin_12);
+                    GPIO_ResetBits(DirPinPort, YDirPin);
                 }
 
                 if(movement.z > 0){
-                    GPIO_SetBits(GPIOC, GPIO_Pin_13);
+                    GPIO_SetBits(DirPinPort, ZDirPin);
                 }else{
-                    GPIO_ResetBits(GPIOC, GPIO_Pin_13);
+                    GPIO_ResetBits(DirPinPort, ZDirPin);
                 }
 
                 if(movement.x && movement.y)
-                   GPIO_SetBits(GPIOE, GPIO_Pin_2 | GPIO_Pin_3);
+                   GPIO_SetBits(StepPinPort, XStepPin | YStepPin);
                 else if(movement.x)
-                   GPIO_SetBits(GPIOE, GPIO_Pin_2);
+                   GPIO_SetBits(StepPinPort, XStepPin);
                 else if(movement.y)
-                   GPIO_SetBits(GPIOE, GPIO_Pin_3);
+                   GPIO_SetBits(StepPinPort, YStepPin);
 
                 if(movement.z){
-                    GPIO_SetBits(GPIOE, GPIO_Pin_4);
+                    GPIO_SetBits(StepPinPort, ZStepPin);
                 }
 
                 if( xTaskWokenByReceive != pdFALSE ){
@@ -105,7 +105,7 @@ void TIM2_IRQHandler(void){
                 }
             }
         }else{
-            GPIO_ResetBits(GPIOE, GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4);
+            GPIO_ResetBits(StepPinPort, XStepPin | YStepPin | ZStepPin);
         }
         timer2State = !timer2State;
     }

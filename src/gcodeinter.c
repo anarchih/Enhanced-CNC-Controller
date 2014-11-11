@@ -3,6 +3,8 @@
 #include "cnc-controller.h"
 #define MAX_F 100.0
 #define MAX_A 1
+#define LOWEST_SPEED 10
+#define AVOID_ERROR 1
 #define X_STEP_LENGTH 1.0
 #define Y_STEP_LENGTH 1.0
 #define Z_STEP_LENGTH 1.0
@@ -11,6 +13,70 @@ float curr_x = 0;
 float curr_y = 0;
 float curr_z = 0;
 float curr_v = 0;
+int Q_sqrt(int a){
+    //return 1/Q_sqrt(a);
+    return a;
+}
+void AccerlationLineMove(int real_target_x, int real_target_y, int real_target_z, int f){
+    
+    float curr_fx = 0, curr_fy = 0, curr_fz = 0, curr_f = 0, max_f;
+    int target_x, target_y, target_z;
+    int dec_x, dec_y, dec_z;
+    float real_target_length, dec_length, target_length;
+    float ax, ay, az;
+    float unit_vector_x, unit_vector_y, unit_vector_z;
+     
+    real_target_length = Q_sqrt(real_target_x*real_target_x + real_target_y*real_target_y + real_target_z*real_target_z);
+    unit_vector_x = real_target_x / real_target_length;
+    unit_vector_y = real_target_y / real_target_length;
+    unit_vector_z = real_target_z / real_target_length;
+    
+    ax = MAX_A * unit_vector_x;
+    ay = MAX_A * unit_vector_y;
+    az = MAX_A * unit_vector_z;
+
+    target_x = real_target_x - unit_vector_x * AVOID_ERROR; 
+    target_y = real_target_y - unit_vector_y * AVOID_ERROR; 
+    target_z = real_target_z - unit_vector_z * AVOID_ERROR;  
+    target_length = Q_sqrt(target_x*target_x + target_y*target_y + target_z*target_z);
+
+    if (f*f/MAX_A > target_length){
+        max_f = Q_sqrt(target_length * MAX_A);
+    }else {
+        max_f = f;
+    }
+    
+    dec_length = target_length - max_f*max_f/2/MAX_A;
+    dec_x = dec_length * unit_vector_x;
+    dec_y = dec_length * unit_vector_y;
+    dec_z = dec_length * unit_vector_z;
+
+    while (curr_f < max_f){
+        curr_fx += ax;
+        curr_fy += ay;
+        curr_fz += az;
+        curr_f += MAX_A;
+        target_x -= (int)curr_fx;
+        target_y -= (int)curr_fy;
+        target_z -= (int)curr_fz;
+        CNC_SetFeedrate((int)curr_f);
+        CNC_Move((int)curr_fx, (int)curr_fy, (int)curr_fz);
+    }
+    if (max_f == f)
+        CNC_Move(dec_x - target_x, dec_y - target_y, dec_z - target_z);
+    while (curr_f >= LOWEST_SPEED){
+        curr_fx -= ax;
+        curr_fy -= ay;
+        curr_fz -= az;
+        curr_f += MAX_A;
+        target_x -= (int)curr_fx;
+        target_y -= (int)curr_fy;
+        target_z -= (int)curr_fz;
+        CNC_SetFeedrate(curr_f);
+        CNC_Move((int)curr_fx, (int)curr_fy, (int)curr_fz);
+    }
+    CNC_Move(real_target_x-target_x, real_target_y, real_target_z);
+}
 float atof(const char* s){
     float rez = 0, fact = 1;
     if (*s == '-'){
@@ -67,7 +133,11 @@ void line_move(uint32_t gnum, char gcode[], struct Exist *exist){
         CNC_SetFeedrate(v.f);
         curr_v = v.f;
     }
-    CNC_Move((int)(v.x/X_STEP_LENGTH), (int)(v.y/Y_STEP_LENGTH), (int)(v.z/Z_STEP_LENGTH));
+    if (v.f < 400)
+        CNC_Move((int)(v.x/X_STEP_LENGTH), (int)(v.y/Y_STEP_LENGTH), (int)(v.z/Z_STEP_LENGTH));
+    else 
+    
+        AccerlationLineMove((int)(v.x/X_STEP_LENGTH), (int)(v.y/Y_STEP_LENGTH), (int)(v.z/Z_STEP_LENGTH), (int)v.f);
      
 }/*
 void G02(char gcode[], struct Exist *exist){

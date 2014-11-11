@@ -42,11 +42,20 @@ float Q_rsqrt( float number )
     return y;
 }
 
+static void updateSpindleSpeed(uint32_t speed){
+    while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+    
+    if(speed > 100)
+        speed = 100;
+
+    TIM_SetCompare1(TIM3, 2400 * speed / 100);
+    return;
+}
+
 static void setStepperState(uint32_t state){
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
 
     if(state){
-        //TODO: reset GPIO 
     }else{
         //TODO: Set GPIO
     }
@@ -58,7 +67,7 @@ static void setStepperState(uint32_t state){
 static void updateFeedrate(uint32_t feedrate){
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
     
-    TIM_PrescalerConfig(TIM2, 10000 / feedrate, TIM_PSCReloadMode_Immediate);
+    TIM_PrescalerConfig(TIM2, 10000 / feedrate, TIM_PSCReloadMode_Update);
     return;
 }
 
@@ -66,20 +75,40 @@ void TIM2_IRQHandler(void){
     struct CNC_Movement_t movement;
     TickType_t xTaskWokenByReceive = pdFALSE;
 
+    GPIO_ToggleBits(GPIOG, GPIO_Pin_13);
+
     if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET){
         TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update);
 
         if(timer2State){
             if(xQueueReceive( movementQueue, &movement, xTaskWokenByReceive) != pdFALSE){
+                if(movement.x > 0){
+                    GPIO_SetBits(DirPinPort, XDirPin);
+                }else{
+                    GPIO_ResetBits(DirPinPort, XDirPin);
+                }
+
+                if(movement.y < 0){
+                    GPIO_SetBits(DirPinPort, YDirPin);
+                }else{
+                    GPIO_ResetBits(DirPinPort, YDirPin);
+                }
+
+                if(movement.z > 0){
+                    GPIO_SetBits(DirPinPort, ZDirPin);
+                }else{
+                    GPIO_ResetBits(DirPinPort, ZDirPin);
+                }
+
                 if(movement.x && movement.y)
-                   GPIO_SetBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_14);
+                   GPIO_SetBits(StepPinPort, XStepPin | YStepPin);
                 else if(movement.x)
-                   GPIO_SetBits(GPIOB, GPIO_Pin_12);
+                   GPIO_SetBits(StepPinPort, XStepPin);
                 else if(movement.y)
-                   GPIO_SetBits(GPIOB, GPIO_Pin_14);
+                   GPIO_SetBits(StepPinPort, YStepPin);
 
                 if(movement.z){
-                    GPIO_SetBits(GPIOB, GPIO_Pin_15);
+                    GPIO_SetBits(StepPinPort, ZStepPin);
                 }
 
                 if( xTaskWokenByReceive != pdFALSE ){
@@ -87,7 +116,7 @@ void TIM2_IRQHandler(void){
                 }
             }
         }else{
-            GPIO_ResetBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_14 | GPIO_Pin_15);
+            GPIO_ResetBits(StepPinPort, XStepPin | YStepPin | ZStepPin);
         }
         timer2State = !timer2State;
     }
@@ -184,6 +213,8 @@ void  CNC_controller_init(void){
 }
 
 void CNC_controller_depatch_task(void *pvParameters){
+    GPIO_ToggleBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_11 | GPIO_Pin_10); //Logic Analyser Debug Trigger
+    GPIO_ToggleBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_11 | GPIO_Pin_10); //Logic Analyser Debug Trigger
     struct CNC_Operation_t operation;
     
     if((operationQueue == 0) || (movementQueue == 0) || (stepperXMutex == NULL) || (stepperYMutex == NULL) || (stepperZMutex == NULL)){
@@ -206,9 +237,8 @@ void CNC_controller_depatch_task(void *pvParameters){
             case disableStepper:
                 setStepperState(0);
                 break;
-            case enableSpindle:
-                break;
-            case disableSpindle:
+            case setSpindleSpeed:
+                updateSpindleSpeed(operation.parameter1);
                 break;
         } 
     }
@@ -256,20 +286,12 @@ void CNC_DisableStepper(){
     return;
 }
 
-void CNC_EnableSpindle(){
+void CNC_SetSpindleSpeed(uint32_t speed){
     struct CNC_Operation_t operation;
     if(operationQueue == 0)
         return;
-    operation.opcodes = enableSpindle; 
-    xQueueSend(operationQueue, &operation, portMAX_DELAY);
-    return;
-}
-
-void CNC_DisableSpindle(){
-    struct CNC_Operation_t operation;
-    if(operationQueue == 0)
-        return;
-    operation.opcodes = disableSpindle; 
+    operation.opcodes = setSpindleSpeed;
+    operation.parameter1 = speed; 
     xQueueSend(operationQueue, &operation, portMAX_DELAY);
     return;
 }

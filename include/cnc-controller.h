@@ -11,14 +11,21 @@
 #define yDefaultMaxSpeed 1000
 #define zDefaultMaxSpeed 1000
 
+#define StepPinPort GPIOE
+#define DirPinPort GPIOC
+#define XStepPin GPIO_Pin_2
+#define YStepPin GPIO_Pin_3
+#define ZStepPin GPIO_Pin_4
+#define XDirPin GPIO_Pin_11
+#define YDirPin GPIO_Pin_8
+#define ZDirPin GPIO_Pin_13
 
 enum CNC_Opcodes{
     moveStepper = 1,
     setFeedrate,
     enableStepper,
     disableStepper,
-    enableSpindle,
-    disableSpindle,
+    setSpindleSpeed,
 };
 
 struct CNC_Operation_t {
@@ -42,8 +49,7 @@ void CNC_Move(int32_t x, int32_t y, int32_t z);
 void CNC_SetFeedrate(uint32_t feedrate);
 void CNC_EnableStepper();
 void CNC_DisableStepper();
-void CNC_EnableSpindle();
-void CNC_DisableSpindle();
+void CNC_SetSpindleSpeed();
 
 
 #endif

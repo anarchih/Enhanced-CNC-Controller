@@ -5,6 +5,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "clib.h"
 #include "cnc-controller.h"
 #include "ui.h"
 #include "newDraw.h"
@@ -126,6 +127,26 @@ static int jogUI_handleInput()
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
             CNC_SetFeedrate(100);
             CNC_Move(0, -20, 0);
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+        }else if(isInRect(&btnXFYF.rect, tp->X, tp->Y)){
+            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+            CNC_SetFeedrate(100);
+            CNC_Move(20, 20, 0);
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+        }else if(isInRect(&btnXFYR.rect, tp->X, tp->Y)){
+            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+            CNC_SetFeedrate(100);
+            CNC_Move(20, -20, 0);
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+        }else if(isInRect(&btnXRYF.rect, tp->X, tp->Y)){
+            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+            CNC_SetFeedrate(100);
+            CNC_Move(-20, 20, 0);
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+        }else if(isInRect(&btnXRYR.rect, tp->X, tp->Y)){
+            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+            CNC_SetFeedrate(100);
+            CNC_Move(-20, -20, 0);
             vTaskDelay(100 / portTICK_PERIOD_MS);
         }else if(isInRect(&btnZForward.rect, tp->X, tp->Y)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements

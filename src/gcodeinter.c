@@ -3,9 +3,17 @@
 #include "cnc-controller.h"
 #define MAX_F 100.0
 #define MAX_A 1
-#define X_STEP_LENGTH 1.0
-#define Y_STEP_LENGTH 1.0
-#define Z_STEP_LENGTH 1.0
+#define X_STEP_LENGTH_MM 1.0
+#define Y_STEP_LENGTH_MM 1.0
+#define Z_STEP_LENGTH_MM 1.0
+#define X_STEP_LENGTH_INCH 1.0
+#define Y_STEP_LENGTH_INCH 1.0
+#define Z_STEP_LENGTH_INCH 1.0 //TODO: Calibrate this
+
+float X_STEP_LENGTH = X_STEP_LENGTH_MM;
+float Y_STEP_LENGTH = Y_STEP_LENGTH_MM;
+float Z_STEP_LENGTH = Z_STEP_LENGTH_MM;
+
 int abs_mode = 1;
 float curr_x = 0;
 float curr_y = 0;
@@ -182,6 +190,14 @@ void ExcuteGCode(char *gcode){
         line_move(1, gcode, &exist);
     }else if (strncmp(gcode, "G04", 3) == 0){
 
+    }else if (strncmp(gcode, "G20", 3) == 0){
+        X_STEP_LENGTH = X_STEP_LENGTH_INCH;
+        Y_STEP_LENGTH = Y_STEP_LENGTH_INCH;
+        Z_STEP_LENGTH = Z_STEP_LENGTH_INCH;
+    }else if (strncmp(gcode, "G21", 3) == 0){
+        X_STEP_LENGTH = X_STEP_LENGTH_MM;
+        Y_STEP_LENGTH = Y_STEP_LENGTH_MM;
+        Z_STEP_LENGTH = Z_STEP_LENGTH_MM;
     }else if (strncmp(gcode, "G90", 3) == 0){
         abs_mode = 1;
     }else if (strncmp(gcode, "G91", 3) == 0){

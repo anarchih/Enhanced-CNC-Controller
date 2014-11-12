@@ -90,7 +90,7 @@ void line_move(uint32_t gnum, char gcode[], struct Exist *exist){
         curr_v = v.f;
         }
     }
-    CNC_Move((int32_t)(v.x/X_STEP_LENGTH), (int32_t)(v.y/Y_STEP_LENGTH), (int32_t)(v.z/Z_STEP_LENGTH));
+    CNC_Move((int32_t)(sv.x/X_STEP_LENGTH), (int32_t)(sv.y/Y_STEP_LENGTH), (int32_t)(sv.z/Z_STEP_LENGTH));
     //TODO: Record Error 
 }
 

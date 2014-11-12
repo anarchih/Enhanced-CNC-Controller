@@ -165,8 +165,6 @@ void ExcuteGCode(char *gcode){
         abs_mode = 0;
     }else if (strncmp(gcode, "M03", 3) == 0){
         CNC_EnableSpindle();
-    }else if (strncmp(gcode, "M04", 3) == 0){
-        CNC_DisableSpindle();
     }else if (strncmp(gcode, "M17", 3) == 0){
         CNC_EnableStepper();
     }else if (strncmp(gcode, "M18", 3) == 0){

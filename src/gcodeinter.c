@@ -3,12 +3,12 @@
 #include "cnc-controller.h"
 #define MAX_F 100.0
 #define MAX_A 1
-#define X_STEP_LENGTH_MM 1.0
-#define Y_STEP_LENGTH_MM 1.0
-#define Z_STEP_LENGTH_MM 1.0
-#define X_STEP_LENGTH_INCH 1.0
-#define Y_STEP_LENGTH_INCH 1.0
-#define Z_STEP_LENGTH_INCH 1.0 //TODO: Calibrate this
+#define X_STEP_LENGTH_MM 0.00625
+#define Y_STEP_LENGTH_MM 0.00625
+#define Z_STEP_LENGTH_MM 0.004
+#define X_STEP_LENGTH_INCH 0.00024606299
+#define Y_STEP_LENGTH_INCH 0.00024606299
+#define Z_STEP_LENGTH_INCH 0.00015748031
 
 float X_STEP_LENGTH = X_STEP_LENGTH_MM;
 float Y_STEP_LENGTH = Y_STEP_LENGTH_MM;
@@ -42,6 +42,7 @@ float atof(const char* s){
     };
     return rez * fact;
 };
+
 void line_move(uint32_t gnum, char gcode[], struct Exist *exist){
     struct Vector v;
     struct Vector sv;

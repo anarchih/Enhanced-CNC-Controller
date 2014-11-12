@@ -14,10 +14,14 @@ float X_STEP_LENGTH = X_STEP_LENGTH_MM;
 float Y_STEP_LENGTH = Y_STEP_LENGTH_MM;
 float Z_STEP_LENGTH = Z_STEP_LENGTH_MM;
 
-int abs_mode = 1;
+int32_t abs_mode = 1;
 float curr_x = 0;
 float curr_y = 0;
 float curr_z = 0;
+float offset_x = 0;
+float offset_y = 0;
+float offset_z = 0;
+
 float curr_v = 0;
 float atof(const char* s){
     float rez = 0, fact = 1;
@@ -57,9 +61,9 @@ void line_move(uint32_t gnum, char gcode[], struct Exist *exist){
         }
     }
     if (abs_mode){
-        v.x = v.x - curr_x;    
-        v.y = v.y - curr_y;
-        v.z = v.z - curr_z;
+        v.x = v.x - curr_x + offset_x;    
+        v.y = v.y - curr_y + offset_y;
+        v.z = v.z - curr_z + offset_z;
     } 
     if(!exist->x)v.x = 0;
     if(!exist->y)v.y = 0;
@@ -98,6 +102,36 @@ static void M03(char gcode[], struct Exist *exist){
         }
     }
     CNC_SetSpindleSpeed(speed);
+}
+
+static void G92(char gcode[], struct Exist *exist){
+    struct Vector v;
+    int t = strlen(gcode);
+    char tmp;
+
+    for (int i=strlen(gcode)-1; i>=1; i--){
+        if ((gcode[i]<48 || gcode[i]>57) && gcode[i]!='.'){
+            tmp = gcode[t];
+            gcode[t] = '\0';
+            if(gcode[i] == 'X')v.x = atof(gcode+i+1);
+            else if(gcode[i] == 'Y')v.y = atof(gcode+i+1);
+            else if(gcode[i] == 'Z')v.z = atof(gcode+i+1);
+            
+            gcode[t] = tmp;
+            t = i;
+        }
+    }
+    
+    if(!exist->x)v.x = curr_x;
+    if(!exist->y)v.y = curr_y;
+    if(!exist->z)v.z = curr_z;
+    
+    offset_x = v.x;
+    offset_y = v.y;
+    offset_z = v.z;
+
+    return;
+
 }
 
 /*
@@ -202,6 +236,9 @@ void ExcuteGCode(char *gcode){
         abs_mode = 1;
     }else if (strncmp(gcode, "G91", 3) == 0){
         abs_mode = 0;
+    }else if (strncmp(gcode, "G92", 3) == 0){
+        CheckExist(gcode, &exist);
+        G92(gcode, &exist);
     }else if (strncmp(gcode, "M03", 3) == 0){
         CheckExist(gcode, &exist);
         M03(gcode, &exist);

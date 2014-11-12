@@ -65,23 +65,31 @@ static void setStepperState(uint32_t state){
 }
 
 static void updateFeedrate(uint32_t feedrate){
-    while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
-    
-    TIM_PrescalerConfig(TIM2, 10000 / feedrate, TIM_PSCReloadMode_Update);
+    struct CNC_Movement_t movement;
+    movement.x = 0;
+    movement.y = 0;
+    movement.z = 0;
+    movement.speed = feedrate;
+    xQueueSend( movementQueue, &movement, portMAX_DELAY );
     return;
 }
 
 void TIM2_IRQHandler(void){
     struct CNC_Movement_t movement;
-    TickType_t xTaskWokenByReceive = pdFALSE;
+    BaseType_t xTaskWokenByReceive = pdFALSE;
 
     GPIO_ToggleBits(GPIOG, GPIO_Pin_13);
 
     if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET){
-        TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update);
 
         if(timer2State){
-            if(xQueueReceive( movementQueue, &movement, xTaskWokenByReceive) != pdFALSE){
+            if(xQueueReceiveFromISR( movementQueue, &movement, &xTaskWokenByReceive) != pdFALSE){
+                if(movement.speed != -1){
+                    TIM_PrescalerConfig(TIM2, 10000 / movement.speed, TIM_PSCReloadMode_Update);
+                }else{
+                    TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update);
+                }
+
                 if(movement.x > 0){
                     GPIO_SetBits(DirPinPort, XDirPin);
                 }else{
@@ -111,14 +119,15 @@ void TIM2_IRQHandler(void){
                     GPIO_SetBits(StepPinPort, ZStepPin);
                 }
 
-                if( xTaskWokenByReceive != pdFALSE ){
-                    portYIELD_FROM_ISR( xTaskWokenByReceive );
-                }
             }
         }else{
             GPIO_ResetBits(StepPinPort, XStepPin | YStepPin | ZStepPin);
+            TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update);
         }
         timer2State = !timer2State;
+        if( xTaskWokenByReceive != pdFALSE ){
+            portYIELD_FROM_ISR( xTaskWokenByReceive );
+        }
     }
 }
 
@@ -127,6 +136,7 @@ void InsertMove(int32_t x, int32_t y, int32_t z){
     movement.x = x;
     movement.y = y;
     movement.z = z;
+    movement.speed = -1;
     xQueueSend( movementQueue, &movement, portMAX_DELAY );
     return;
 }
@@ -191,7 +201,7 @@ uint8_t moveRelativly(int32_t x, int32_t y, int32_t z){
 }
 
 void  CNC_controller_init(void){
-    operationQueue = xQueueCreate(256, sizeof(struct CNC_Operation_t));
+    operationQueue = xQueueCreate(32, sizeof(struct CNC_Operation_t));
     movementQueue = xQueueCreate(256, sizeof(struct CNC_Movement_t));
     
     stepperXMutex = xSemaphoreCreateBinary();

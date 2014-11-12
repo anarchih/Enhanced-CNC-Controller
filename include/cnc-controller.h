@@ -39,6 +39,7 @@ struct CNC_Movement_t {
     int8_t x;
     int8_t y;
     int8_t z;
+    int32_t speed;
 };
 
 void  CNC_controller_init(void);

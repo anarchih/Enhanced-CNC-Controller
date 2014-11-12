@@ -44,6 +44,7 @@ float atof(const char* s){
 };
 void line_move(uint32_t gnum, char gcode[], struct Exist *exist){
     struct Vector v;
+    struct Vector sv;
     int t = strlen(gcode);
     char tmp;
 
@@ -61,13 +62,21 @@ void line_move(uint32_t gnum, char gcode[], struct Exist *exist){
         }
     }
     if (abs_mode){
-        v.x = v.x - curr_x + offset_x;    
-        v.y = v.y - curr_y + offset_y;
-        v.z = v.z - curr_z + offset_z;
+        sv.x = v.x - curr_x + offset_x;    
+        sv.y = v.y - curr_y + offset_y;
+        sv.z = v.z - curr_z + offset_z;
+    }else{
+        sv.x = v.x;    
+        sv.y = v.y;
+        sv.z = v.z;
     } 
-    if(!exist->x)v.x = 0;
-    if(!exist->y)v.y = 0;
-    if(!exist->z)v.z = 0;
+    if(!exist->x)sv.x = 0;
+    if(!exist->y)sv.y = 0;
+    if(!exist->z)sv.z = 0;
+
+    curr_x += sv.x;
+    curr_y += sv.y;
+    curr_z += sv.z;
     
     if(!gnum){
         v.f = MAX_F;
@@ -76,11 +85,13 @@ void line_move(uint32_t gnum, char gcode[], struct Exist *exist){
             v.f = curr_v;
     }
     if(v.f != curr_v){
+        if(v.f > 0){
         CNC_SetFeedrate(v.f);
         curr_v = v.f;
+        }
     }
-    CNC_Move((int)(v.x/X_STEP_LENGTH), (int)(v.y/Y_STEP_LENGTH), (int)(v.z/Z_STEP_LENGTH));
-     
+    CNC_Move((int32_t)(v.x/X_STEP_LENGTH), (int32_t)(v.y/Y_STEP_LENGTH), (int32_t)(v.z/Z_STEP_LENGTH));
+    //TODO: Record Error 
 }
 
 static void M03(char gcode[], struct Exist *exist){

@@ -20,6 +20,7 @@
 #include "host.h"
 
 #include "cnc-controller.h"
+#include "gcodeinter.h"
 #include "ui.h"
 
 /* _sromfs symbol can be found in main.ld linker script
@@ -111,6 +112,19 @@ void command_prompt(void *pvParameters)
     }
 }
 
+void gcode_command_prompt(void *pvParameters)
+{
+	char buf[128];
+
+	fio_printf(1, "\rWelcome to GCode Shell\r\n");
+    while(1){
+        fio_printf(1, ">");
+        fio_read(0, buf, 127);
+        ExcuteGCode(buf);
+        fio_printf(1, "A");
+    }
+}
+
 /*
 void system_logger(void *pvParameters)
 {
@@ -197,7 +211,7 @@ int main()
 	serial_rx_queue = xQueueCreate(1, sizeof(char));
 
 	/* Create a task to output text read from romfs. */
-	xTaskCreate(command_prompt,
+	xTaskCreate(gcode_command_prompt,
 	            "CLI",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
 

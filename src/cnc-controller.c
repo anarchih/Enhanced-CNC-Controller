@@ -81,7 +81,6 @@ void TIM2_IRQHandler(void){
     GPIO_ToggleBits(GPIOG, GPIO_Pin_13);
 
     if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET){
-
         if(timer2State){
             if(xQueueReceiveFromISR( movementQueue, &movement, &xTaskWokenByReceive) != pdFALSE){
                 if(movement.speed != -1){
@@ -118,7 +117,6 @@ void TIM2_IRQHandler(void){
                 if(movement.z){
                     GPIO_SetBits(StepPinPort, ZStepPin);
                 }
-
             }
         }else{
             GPIO_ResetBits(StepPinPort, XStepPin | YStepPin | ZStepPin);
@@ -223,8 +221,6 @@ void  CNC_controller_init(void){
 }
 
 void CNC_controller_depatch_task(void *pvParameters){
-    GPIO_ToggleBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_11 | GPIO_Pin_10); //Logic Analyser Debug Trigger
-    GPIO_ToggleBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_11 | GPIO_Pin_10); //Logic Analyser Debug Trigger
     struct CNC_Operation_t operation;
     
     if((operationQueue == 0) || (movementQueue == 0) || (stepperXMutex == NULL) || (stepperYMutex == NULL) || (stepperZMutex == NULL)){

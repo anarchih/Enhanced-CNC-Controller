@@ -69,7 +69,30 @@ void line_move(uint32_t gnum, char gcode[], struct Exist *exist){
     }
     CNC_Move((int)(v.x/X_STEP_LENGTH), (int)(v.y/Y_STEP_LENGTH), (int)(v.z/Z_STEP_LENGTH));
      
-}/*
+}
+
+static void M03(char gcode[], struct Exist *exist){
+    int t = strlen(gcode);
+    char tmp;
+    uint32_t speed;
+
+    if(!exist->s)
+        return;
+
+    for (int i=strlen(gcode)-1; i>=1; i--){
+        if ((gcode[i]<48 || gcode[i]>57) && gcode[i]!='.'){
+            tmp = gcode[t];
+            gcode[t] = '\0';
+            if(gcode[i] == 'S')speed = atof(gcode+i+1);
+            
+            gcode[t] = tmp;
+            t = i;
+        }
+    }
+    CNC_SetSpindleSpeed(speed);
+}
+
+/*
 void G02(char gcode[], struct Exist *exist){
     struct XYZ_Vector v;
     float vi, vj, vk, R, i_pos, j_pos, x_pos, y_pos;   
@@ -164,7 +187,9 @@ void ExcuteGCode(char *gcode){
     }else if (strncmp(gcode, "G91", 3) == 0){
         abs_mode = 0;
     }else if (strncmp(gcode, "M03", 3) == 0){
-        CNC_EnableSpindle();
+
+        CheckExist(gcode, &exist);
+        M03(gcode, &exist);
     }else if (strncmp(gcode, "M17", 3) == 0){
         CNC_EnableStepper();
     }else if (strncmp(gcode, "M18", 3) == 0){

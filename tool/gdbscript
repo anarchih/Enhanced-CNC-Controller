@@ -4,4 +4,5 @@ load
 monitor reset
 monitor halt
 
-b ui.c:183
+b line_move
+b atof

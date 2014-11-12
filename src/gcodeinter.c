@@ -49,7 +49,7 @@ void line_move(uint32_t gnum, char gcode[], struct Exist *exist){
     char tmp;
 
     for (int i=strlen(gcode)-1; i>=1; i--){
-        if ((gcode[i]<48 || gcode[i]>57) && gcode[i]!='.'){
+        if ((gcode[i]<48 || gcode[i]>57) && gcode[i]!='.' && gcode[i]!='-'){
             tmp = gcode[t];
             gcode[t] = '\0';
             if(gcode[i] == 'F')v.f = atof(gcode+i+1);

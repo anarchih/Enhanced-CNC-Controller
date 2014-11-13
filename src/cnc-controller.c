@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include "host.h"
@@ -7,6 +9,7 @@
 #include "stm32_f429.h"
 #include "fio.h"
 #include "clib.h"
+#include "cnc_misc.h"
 
 #include "stm32f4xx_gpio.h"
 
@@ -20,18 +23,27 @@ SemaphoreHandle_t stepperYMutex;
 SemaphoreHandle_t stepperZMutex;
 
 uint32_t MovementSpeed;
+uint32_t SpindleSpeed;
 
 uint32_t timer2State;
 
 uint32_t stepperState;
 
 static void updateSpindleSpeed(uint32_t speed){
+    uint32_t delta;
+
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
     
     if(speed > 100)
         speed = 100;
-
-    TIM_SetCompare1(TIM3, 2400 * speed / 100);
+    if(speed < 25)
+        speed = 25;
+    
+    delta = speed - SpindleSpeed;
+    for(uint32_t i = 0; i < abs_int(delta) / 5.0; i++){
+        TIM_SetCompare1(TIM3, 2400 * (delta / 5.0) * (i + 1) / 100);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
+    }
     return;
 }
 

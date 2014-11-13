@@ -52,7 +52,7 @@ static ssize_t stdin_read(void * opaque, void * buf, size_t count) {
 		default:
 			last_chr_is_esc=0;
 	}
-	send_byte(ptrbuf[i]);
+//	send_byte(ptrbuf[i]);
 	++i;
     }
     return i;

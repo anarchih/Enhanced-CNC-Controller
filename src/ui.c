@@ -57,7 +57,7 @@ struct UI_Btn btnExit;
 static void init(){
     SET_BTN(btnJogMode, 25, 25, 50, 50, "JOG");
     SET_BTN(btnSpindleSetting, 125, 25, 50, 50, "Spindle");
-    SET_BTN(btnGcodeShell, 225, 25, 50, 50, "G-Code");
+    SET_BTN(btnGcodeShell, 25, 125, 50, 50, "G-Code");
 
     SET_BTN(btnXFYF, 25, 25, 50, 50, "X+Y+");
     SET_BTN(btnXFYR, 165, 25, 50, 50, "X+Y-");
@@ -110,6 +110,8 @@ static void mainUI_handleInput()
             jogUI();
         }else if(isInRect(&btnSpindleSetting.rect, tp->X, tp->Y)){
             spindleUI();
+        }else if(isInRect(&btnGcodeShell.rect, tp->X, tp->Y)){
+            gcodeUI();
         }
     }
 }
@@ -121,6 +123,7 @@ static void mainUI_render()
     LCD_SetTextColor(LCD_COLOR_RED);
     drawBtn(&btnJogMode);
     drawBtn(&btnSpindleSetting);
+    drawBtn(&btnGcodeShell);
 
     new_LCD_DisplayStringLine(4, 55, (uint8_t*) "SELECT MODE");
 
@@ -287,10 +290,9 @@ static int gcodeUI_handleInput()
     uint32_t ret = 0;
 	char buf[128];
 
-	fio_printf(1, "\rWelcome to GCode Shell\r\n");
     fio_read(0, buf, 127);
     ret = ExcuteGCode(buf);
-    fio_printf(1, "\x06");
+    fio_printf(1, "A");
     return ret;
 }
 
@@ -340,12 +342,9 @@ void gcodeUI(void){
     uint8_t back = 0;
 
     while(1){
-	    fio_printf(1, "\rWelcome to GCode Shell\r\n");
-        fio_printf(1, ">");
+        gcodeUI_render();
 
         back = gcodeUI_handleInput();
-
-        gcodeUI_render();
 
         if (back)
             return;

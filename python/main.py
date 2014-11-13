@@ -35,8 +35,7 @@ def shell():
             print("M114; - report position and feedrate")
         else:
             ser.write((code.strip() + "\n").encode("ASCII"))
-            ser.read(1)
-
+            ser.readline();
 
 def send():
     fn = input("Please input G-Code file's filename:")
@@ -44,8 +43,7 @@ def send():
     for l in f:
         print(l.strip())
         ser.write((l.strip() + "\n").encode("ASCII"))
-        while(int(ser.read(1).encode('hex'), 16) != 6):
-            pass
+        ser.read(1);
 
 print("Welcome to CNC430 Contorl Program!")
 print("type in commands to operate; help to list commands")

@@ -1,5 +1,5 @@
 #include <string.h>
-#include "misc.h"
+#include "cnc_misc.h"
 #include "gcodeinter.h"
 #include "cnc-controller.h"
 #define MAX_F 100.0

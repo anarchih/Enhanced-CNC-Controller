@@ -1,4 +1,4 @@
-#include "misc.h"
+#include "cnc_misc.h"
 
 float atof(const char* s){
     float rez = 0, fact = 1;

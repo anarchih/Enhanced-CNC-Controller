@@ -11,6 +11,8 @@
 #define Y_STEP_LENGTH_INCH 0.00024606299
 #define Z_STEP_LENGTH_INCH 0.00015748031
 
+#define RMS_SPEED_FACTOR 0.00970180395
+
 float X_STEP_LENGTH = X_STEP_LENGTH_MM;
 float Y_STEP_LENGTH = Y_STEP_LENGTH_MM;
 float Z_STEP_LENGTH = Z_STEP_LENGTH_MM;
@@ -110,7 +112,7 @@ void line_move(uint32_t gnum, struct Vector v, struct Exist *exist){
     }
     if(v.f != curr_v){
         if(v.f > 0){
-        CNC_SetFeedrate(v.f);
+        CNC_SetFeedrate((v.f / RMS_SPEED_FACTOR) / 60);
         curr_v = v.f;
         }
     }

@@ -186,7 +186,7 @@ static int jogUI_handleInput()
 //        }
 
         if ((ipow(touchPannelPoint.x - jogUI_centerOfControlInput.x, 2) +
-            (ipow(touchPannelPoint.y - jogUI_centerOfControlInput.y, 2))) <= ipow(jogUI_radiusOfControlPad, 2)) {
+            (ipow(touchPannelPoint.y - jogUI_centerOfControlInput.y, 2))) < (ipow(jogUI_radiusOfControlPad, 2))) {
 
             jogUI_centerOfControlInput.x = touchPannelPoint.x;
             jogUI_centerOfControlInput.y = touchPannelPoint.y;
@@ -194,7 +194,9 @@ static int jogUI_handleInput()
 
         if(new_PointIsInRect(&share_exitButton.rect, &touchPannelPoint))
             return 1;
-    } else {
+    }
+
+    if( !touchPannelInfo->TouchDetected ) {
         jogUI_centerOfControlInput.x = jogUI_centerOfControlPad.x;
         jogUI_centerOfControlInput.y = jogUI_centerOfControlPad.y;
     }

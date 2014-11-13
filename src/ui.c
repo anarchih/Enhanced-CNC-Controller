@@ -47,14 +47,11 @@ struct UI_Btn btnXRYF;
 struct UI_Btn btnXFYR;
 struct UI_Btn btnFast;
 
-/* Spindle UI */
-struct UI_Btn btnSpeedUp;
-struct UI_Btn btnSpeedDown;
-
 /* Sharing UI */
 struct UI_Btn btnExit;
+struct UI_Btn spindle_haltButton;
 
-int32_t spindleSpeed = 0;
+int32_t spindleSpeed = 1;
 
 static void init(){
     SET_BTN(btnJogMode, 25, 25, 50, 50, "JOG");
@@ -73,9 +70,7 @@ static void init(){
     SET_BTN(btnZForward, 25, 245, 50, 50, "Z+");
     SET_BTN(btnZReverse, 165, 245, 50, 50, "Z-");
 
-    SET_BTN(btnSpeedUp, 95, 25, 50, 50, "SpeedUp");
-    SET_BTN(btnSpeedDown, 95, 175, 50, 50, "SlowDown");
-
+    SET_BTN(spindle_haltButton, 165, 245, 50, 50, "HALT");
     SET_BTN(btnExit, 95, 245, 50, 50, "BACK");
 }
 
@@ -236,8 +231,15 @@ static void spindleUI_render()
     LCD_SetTextColor(LCD_COLOR_RED);
     LCD_DrawFullRect(24, 24, 52, 202);
 
-    LCD_SetTextColor(LCD_COLOR_BLACK);
-    LCD_DrawFullRect(25, 25, 50, spindleSpeed * 2);
+    if (spindleSpeed != 100) {
+        LCD_SetTextColor(LCD_COLOR_BLACK);
+        LCD_DrawFullRect(25, 25, 50, (100 - spindleSpeed) * 2);
+    }
+
+    LCD_SetTextColor(LCD_COLOR_RED);
+    new_DisplayStringLine(225 + 4, 25, (uint8_t*) itoa("1234567890", spindleSpeed, 10));
+
+    drawBtn(&spindle_haltButton);
 
     new_Present();
 }
@@ -246,31 +248,23 @@ static int spindleUI_handleInput()
 {
     tp = IOE_TP_GetState(); 
 
-    if( tp->TouchDetected ){
-//        if(isInRect(&btnSpeedUp.rect, tp->X, tp->Y)){
-//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-//            CurrentSpindleSpeed += 10;
-//            if(CurrentSpindleSpeed > 100)
-//                CurrentSpindleSpeed = 100;
-//            CNC_SetSpindleSpeed(CurrentSpindleSpeed);
-//            vTaskDelay(100 / portTICK_PERIOD_MS);
-//
-//        }else if(isInRect(&btnSpeedDown.rect, tp->X, tp->Y)){
-//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-//            CurrentSpindleSpeed -= 10;
-//            if(CurrentSpindleSpeed < 0)
-//                CurrentSpindleSpeed = 0;
-//            CNC_SetSpindleSpeed(CurrentSpindleSpeed);
-//            vTaskDelay(xDelay);
+    if( tp->TouchDetected ) {
         if(isInRect(&btnExit.rect, tp->X, tp->Y))
             return 1;
 
-        spindleSpeed = (tp->Y - 25) / 2;
-        if (spindleSpeed < 0)
-            spindleSpeed = 0;
-        if (spindleSpeed > 100)
-            spindleSpeed = 100;
-        //}
+        if ((tp->X < 75) && (tp->X > 25)) {
+            spindleSpeed = (225 - tp->Y) / 2;
+            if (spindleSpeed < 1)
+                spindleSpeed = 1;
+            if (spindleSpeed > 100)
+                spindleSpeed = 100;
+
+            while(uxQueueMessagesWaiting( operationQueue ))
+                ; // Clear Movements
+
+            CNC_SetSpindleSpeed(spindleSpeed);
+            vTaskDelay(xDelay);
+        }
     } 
     return 0;
 }

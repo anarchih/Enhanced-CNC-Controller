@@ -1,19 +1,19 @@
 #ifndef GCODE_H
 #define GCODE_H
-void ExcuteGCode(char *gcode);
 
+#include <stdint.h>
 
-float atof(const char* s);
+uint32_t ExcuteGCode(char *gcode);
 
 struct Exist{ 
-    unsigned int x :1;
-    unsigned int y :1;
-    unsigned int z :1;    
-    unsigned int i :1; 
-    unsigned int j :1;
-    unsigned int k :1;
-    unsigned int f :1;    
-    unsigned int s :1;
+    uint32_t x :1;
+    uint32_t y :1;
+    uint32_t z :1;    
+    uint32_t i :1; 
+    uint32_t j :1;
+    uint32_t k :1;
+    uint32_t f :1;    
+    uint32_t s :1;
 };
 
 struct Vector{

@@ -20,6 +20,7 @@
 #include "host.h"
 
 #include "cnc-controller.h"
+#include "gcodeinter.h"
 #include "ui.h"
 
 /* _sromfs symbol can be found in main.ld linker script
@@ -96,20 +97,32 @@ void command_prompt(void *pvParameters)
     char hint[] = USER_NAME "@" USER_NAME "-STM32:~$ ";
 
 	fio_printf(1, "\rWelcome to FreeRTOS Shell\r\n");
-	while(1){
-                fio_printf(1, "%s", hint);
-		fio_read(0, buf, 127);
-	
-		int n=parse_command(buf, argv);
+    while(1){
+        fio_printf(1, "%s", hint);
+        fio_read(0, buf, 127);
 
-		/* will return pointer to the command function */
-		cmdfunc *fptr=do_command(argv[0]);
-		if(fptr!=NULL)
-			fptr(n, argv);
-		else
-			fio_printf(2, "\r\n\"%s\" command not found.\r\n", argv[0]);
-	}
+        int n=parse_command(buf, argv);
 
+        /* will return pointer to the command function */
+        cmdfunc *fptr=do_command(argv[0]);
+        if(fptr!=NULL)
+            fptr(n, argv);
+        else
+            fio_printf(2, "\r\n\"%s\" command not found.\r\n", argv[0]);
+    }
+}
+
+void gcode_command_prompt(void *pvParameters)
+{
+	char buf[128];
+
+	fio_printf(1, "\rWelcome to GCode Shell\r\n");
+    while(1){
+        fio_printf(1, ">");
+        fio_read(0, buf, 127);
+        ExcuteGCode(buf);
+        fio_printf(1, "\x06");
+    }
 }
 
 /*
@@ -158,9 +171,9 @@ int main()
 {
     RCC_Configuration();
     GPIOA_Configuration();
-    GPIOB_Configuration();
     GPIOC_Configuration();
     GPIOG_Configuration();
+    GPIOE_Configuration();
     USART1_Configuration();
 	enable_rs232_interrupts();
 	enable_rs232();
@@ -169,19 +182,21 @@ int main()
     LTDC_Cmd(ENABLE);
 
     LCD_LayerInit();
-    LCD_SetLayer(LCD_FOREGROUND_LAYER);
-    LCD_Clear(LCD_COLOR_BLACK);
     LCD_SetColors(LCD_COLOR_RED, LCD_COLOR_BLACK);
-
+    LCD_SetLayer(LCD_BACKGROUND_LAYER);
+    LCD_SetTransparency(0xff);
+    LCD_SetLayer(LCD_FOREGROUND_LAYER);
+    LCD_SetTransparency(0x00);
 
     IOE_Config();
-    //IOE_TPITConfig();
 
     GPIO_SetBits(GPIOG, GPIO_Pin_13); //Logic Analyser Debug Trigger
-    GPIO_ToggleBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_11 | GPIO_Pin_10); //Logic Analyser Debug Trigger
-    GPIO_ToggleBits(GPIOB, GPIO_Pin_12 | GPIO_Pin_11 | GPIO_Pin_10); //Logic Analyser Debug Trigger
+    //GPIO_SetBits(GPIOC, GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13); //Logic Analyser Debug Trigger
+    //GPIO_ToggleBits(GPIOC, GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13); //Logic Analyser Debug Trigger
 
     TIMER2_Configuration();
+    TIMER3_Configuration();
+    PWM_Init();
     CNC_controller_init();
 	
 	fs_init();
@@ -196,17 +211,18 @@ int main()
 	serial_rx_queue = xQueueCreate(1, sizeof(char));
 
 	/* Create a task to output text read from romfs. */
-	xTaskCreate(command_prompt,
-	            "CLI",
-	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
+	//xTaskCreate(gcode_command_prompt,
+	//            "CLI",
+	//            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
 
 	xTaskCreate(CNC_controller_depatch_task,
 	            "CNC",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
 
 	xTaskCreate(mainUI,
-	            "JOG",
+	            "UI",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
+
 #if 0
 	/* Create a task to record system log. */
 	xTaskCreate(system_logger,

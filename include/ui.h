@@ -8,7 +8,13 @@ struct UI_Rect{
     uint32_t height;
 };
 
+struct UI_Btn{
+    struct UI_Rect rect;
+    char* name;
+};
+
 void mainUI(void *pvParameters);
 void jogUI();
+void spindleUI();
  
 #endif //__JOGMODE__

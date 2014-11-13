@@ -139,24 +139,7 @@ static void M03(char gcode[], struct Exist *exist){
     CNC_SetSpindleSpeed(speed);
 }
 
-static void G92(char gcode[], struct Exist *exist){
-    struct Vector v;
-    int t = strlen(gcode);
-    char tmp;
-
-    for (int i=strlen(gcode)-1; i>=1; i--){
-        if ((gcode[i]<48 || gcode[i]>57) && gcode[i]!='.'){
-            tmp = gcode[t];
-            gcode[t] = '\0';
-            if(gcode[i] == 'X')v.x = atof(gcode+i+1);
-            else if(gcode[i] == 'Y')v.y = atof(gcode+i+1);
-            else if(gcode[i] == 'Z')v.z = atof(gcode+i+1);
-            
-            gcode[t] = tmp;
-            t = i;
-        }
-    }
-    
+static void G92(struct Vector v, struct Exist *exist){
     if(!exist->x)v.x = curr_x;
     if(!exist->y)v.y = curr_y;
     if(!exist->z)v.z = curr_z;
@@ -164,9 +147,7 @@ static void G92(char gcode[], struct Exist *exist){
     offset_x = v.x;
     offset_y = v.y;
     offset_z = v.z;
-
     return;
-
 }
 
 /*
@@ -215,20 +196,20 @@ void G02(char gcode[], struct Exist *exist){
 }*/
 void ExcuteGCode(char *gcode){
     struct Exist exist;
-    struct Vector v1, v2;
-    uint32_t r, s;
+    struct Vector v1;
+    uint32_t s;
 
     // G00 G01 G02 G03 G90 G91 G92 M02 M03 M04 M17 M18 
     if (strncmp(gcode, "G00", 3) == 0 || 
         strncmp(gcode, "G0 ", 3) == 0  ){ 
 
-        retriveParameters(gcode, &exist, v1, NULL, NULL, NULL);
+        retriveParameters(gcode, &exist, &v1, NULL, NULL, NULL);
         line_move(0, v1, &exist);
     }else if( strncmp(gcode, "G01", 3) == 0 ||
         strncmp(gcode, "G1", 2) == 0  ){
 
-        retriveParameters(gcode, &exist, v1, NULL, NULL, NULL);
-        line_move(1, v1, &exist);
+        retriveParameters(gcode, &exist, &v1, NULL, NULL, NULL);
+        line_move(0, v1, &exist);
     }else if (strncmp(gcode, "G04", 3) == 0){
 
     }else if (strncmp(gcode, "G20", 3) == 0){
@@ -244,10 +225,10 @@ void ExcuteGCode(char *gcode){
     }else if (strncmp(gcode, "G91", 3) == 0){
         abs_mode = 0;
     }else if (strncmp(gcode, "G92", 3) == 0){
-        CheckExist(gcode, &exist);
-        G92(gcode, &exist);
+        retriveParameters(gcode, &exist, &v1, NULL, NULL, NULL);
+        G92(v1, &exist);
     }else if (strncmp(gcode, "M03", 3) == 0){
-        CheckExist(gcode, &exist);
+        retriveParameters(gcode, &exist, NULL, NULL, NULL, &s);
         M03(gcode, &exist);
     }else if (strncmp(gcode, "M05", 3) == 0){
         CNC_SetSpindleSpeed(0);

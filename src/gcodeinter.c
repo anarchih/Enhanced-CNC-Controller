@@ -83,25 +83,8 @@ static void retriveParameters(char gcode[], struct Exist *exist, struct Vector *
     return;
 }
 
-void line_move(uint32_t gnum, char gcode[], struct Exist *exist){
-    struct Vector v;
+void line_move(uint32_t gnum, struct Vector v, struct Exist *exist){
     struct Vector sv;
-    int t = strlen(gcode);
-    char tmp;
-
-    for (int i=strlen(gcode)-1; i>=1; i--){
-        if ((gcode[i]<48 || gcode[i]>57) && gcode[i]!='.' && gcode[i]!='-'){
-            tmp = gcode[t];
-            gcode[t] = '\0';
-            if(gcode[i] == 'F')v.f = atof(gcode+i+1);
-            else if(gcode[i] == 'Z')v.z = atof(gcode+i+1);
-            else if(gcode[i] == 'Y')v.y = atof(gcode+i+1);
-            else if(gcode[i] == 'X')v.x = atof(gcode+i+1);
-            
-            gcode[t] = tmp;
-            t = i;
-        }
-    }
     if (abs_mode){
         sv.x = v.x - curr_x + offset_x;    
         sv.y = v.y - curr_y + offset_y;
@@ -232,17 +215,20 @@ void G02(char gcode[], struct Exist *exist){
 }*/
 void ExcuteGCode(char *gcode){
     struct Exist exist;
+    struct Vector v1, v2;
+    uint32_t r, s;
+
     // G00 G01 G02 G03 G90 G91 G92 M02 M03 M04 M17 M18 
     if (strncmp(gcode, "G00", 3) == 0 || 
         strncmp(gcode, "G0 ", 3) == 0  ){ 
 
-        CheckExist(gcode, &exist);
-        line_move(0, gcode, &exist);
+        retriveParameters(gcode, &exist, v1, NULL, NULL, NULL);
+        line_move(0, v1, &exist);
     }else if( strncmp(gcode, "G01", 3) == 0 ||
         strncmp(gcode, "G1", 2) == 0  ){
 
-        CheckExist(gcode, &exist);
-        line_move(1, gcode, &exist);
+        retriveParameters(gcode, &exist, v1, NULL, NULL, NULL);
+        line_move(1, v1, &exist);
     }else if (strncmp(gcode, "G04", 3) == 0){
 
     }else if (strncmp(gcode, "G20", 3) == 0){

@@ -118,24 +118,7 @@ void line_move(uint32_t gnum, struct Vector v, struct Exist *exist){
     //TODO: Record Error 
 }
 
-static void M03(char gcode[], struct Exist *exist){
-    int t = strlen(gcode);
-    char tmp;
-    uint32_t speed;
-
-    if(!exist->s)
-        return;
-
-    for (int i=strlen(gcode)-1; i>=1; i--){
-        if ((gcode[i]<48 || gcode[i]>57) && gcode[i]!='.'){
-            tmp = gcode[t];
-            gcode[t] = '\0';
-            if(gcode[i] == 'S')speed = atof(gcode+i+1);
-            
-            gcode[t] = tmp;
-            t = i;
-        }
-    }
+static void M03(uint32_t speed, struct Exist *exist){
     CNC_SetSpindleSpeed(speed);
 }
 
@@ -229,7 +212,7 @@ void ExcuteGCode(char *gcode){
         G92(v1, &exist);
     }else if (strncmp(gcode, "M03", 3) == 0){
         retriveParameters(gcode, &exist, NULL, NULL, NULL, &s);
-        M03(gcode, &exist);
+        M03(s, &exist);
     }else if (strncmp(gcode, "M05", 3) == 0){
         CNC_SetSpindleSpeed(0);
     }else if (strncmp(gcode, "M17", 3) == 0){

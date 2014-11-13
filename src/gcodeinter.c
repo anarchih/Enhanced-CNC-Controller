@@ -25,6 +25,30 @@ float offset_z = 0;
 
 float curr_v = 0;
 
+static void retriveParameters(char gcode[], struct Vector *v1, struct Vector *v2, uint32_t *r, uint32_t *s){
+    int t = strlen(gcode);
+    char tmp;
+
+    for (int i=strlen(gcode)-1; i>=1; i--){
+        if ((gcode[i]<48 || gcode[i]>57) && gcode[i]!='.' && gcode[i]!='-'){
+            tmp = gcode[t];
+            gcode[t] = '\0';
+            if(gcode[i] == 'F' && v1 != NULL)v1->f = atof(gcode+i+1);
+            else if(gcode[i] == 'Z' && v1 != NULL)v1->z = atof(gcode+i+1);
+            else if(gcode[i] == 'Y' && v1 != NULL)v1->y = atof(gcode+i+1);
+            else if(gcode[i] == 'X' && v1 != NULL)v1->x = atof(gcode+i+1);
+            else if(gcode[i] == 'I' && v2 != NULL)v2->x = atof(gcode+i+1);
+            else if(gcode[i] == 'J' && v2 != NULL)v2->y = atof(gcode+i+1);
+            else if(gcode[i] == 'K' && v2 != NULL)v2->z = atof(gcode+i+1);
+            else if(gcode[i] == 'R' && r != NULL)*r = atof(gcode+i+1);
+            else if(gcode[i] == 'S' && s != NULL)*s = atof(gcode+i+1);
+            
+            gcode[t] = tmp;
+            t = i;
+        }
+    }
+}
+
 void line_move(uint32_t gnum, char gcode[], struct Exist *exist){
     struct Vector v;
     struct Vector sv;

@@ -2,9 +2,6 @@
 #define GCODE_H
 void ExcuteGCode(char *gcode);
 
-
-float atof(const char* s);
-
 struct Exist{ 
     unsigned int x :1;
     unsigned int y :1;

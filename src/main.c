@@ -121,7 +121,7 @@ void gcode_command_prompt(void *pvParameters)
         fio_printf(1, ">");
         fio_read(0, buf, 127);
         ExcuteGCode(buf);
-        fio_printf(1, "A");
+        fio_printf(1, "\x06");
     }
 }
 

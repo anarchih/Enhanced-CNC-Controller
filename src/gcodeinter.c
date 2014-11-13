@@ -185,9 +185,9 @@ void line_move(uint32_t gnum, struct Vector v, struct Exist *exist){
         }
     }
     if (v.f < 400)
-        CNC_Move((int)(v.x/X_STEP_LENGTH), (int)(v.y/Y_STEP_LENGTH), (int)(v.z/Z_STEP_LENGTH));
+        CNC_Move((int)(sv.x/X_STEP_LENGTH), (int)(sv.y/Y_STEP_LENGTH), (int)(sv.z/Z_STEP_LENGTH));
     else 
-        AccerlationLineMove((int)(v.x/X_STEP_LENGTH), (int)(v.y/Y_STEP_LENGTH), (int)(v.z/Z_STEP_LENGTH), (int)v.f);
+        AccerlationLineMove((int)(sv.x/X_STEP_LENGTH), (int)(sv.y/Y_STEP_LENGTH), (int)(sv.z/Z_STEP_LENGTH), (int)sv.f);
      
 }/*
     CNC_Move((int32_t)(sv.x/X_STEP_LENGTH), (int32_t)(sv.y/Y_STEP_LENGTH), (int32_t)(sv.z/Z_STEP_LENGTH));

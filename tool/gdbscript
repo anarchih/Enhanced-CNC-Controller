@@ -4,4 +4,4 @@ load
 monitor reset
 monitor halt
 
-b recv_byte
+b line_move

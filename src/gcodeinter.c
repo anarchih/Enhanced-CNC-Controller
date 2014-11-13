@@ -25,7 +25,38 @@ float offset_z = 0;
 
 float curr_v = 0;
 
-static void retriveParameters(char gcode[], struct Vector *v1, struct Vector *v2, uint32_t *r, uint32_t *s){
+static void CheckExist(char* gcode,struct Exist *exist){
+    for (int i=0; i<strlen(gcode); i++){
+        switch (gcode[i]){
+            case 'X':
+                exist->x = 1;
+                break;
+            case 'Y':
+                exist->y = 1;
+                break;
+            case 'Z':
+                exist->z = 1;
+                break;
+            case 'I':
+                exist->i = 1;
+                break;
+            case 'J':
+                exist->j = 1;
+                break;
+            case 'K':
+                exist->k = 1;
+                break;
+            case 'F':
+                exist->f = 1;
+                break;
+            case 'S':
+                exist->s = 1;
+                break;
+        }
+    }
+}
+
+static void retriveParameters(char gcode[], struct Exist *exist, struct Vector *v1, struct Vector *v2, uint32_t *r, uint32_t *s){
     int t = strlen(gcode);
     char tmp;
 
@@ -47,6 +78,9 @@ static void retriveParameters(char gcode[], struct Vector *v1, struct Vector *v2
             t = i;
         }
     }
+
+    CheckExist(gcode, exist);
+    return;
 }
 
 void line_move(uint32_t gnum, char gcode[], struct Exist *exist){
@@ -196,37 +230,6 @@ void G02(char gcode[], struct Exist *exist){
     for (float theta = theta1; theta<theta2; theta+=0.1)
         
 }*/
-void CheckExist(char* gcode,struct Exist *exist){
-    for (int i=0; i<strlen(gcode); i++){
-        switch (gcode[i]){
-            case 'X':
-                exist->x = 1;
-                break;
-            case 'Y':
-                exist->y = 1;
-                break;
-            case 'Z':
-                exist->z = 1;
-                break;
-            case 'I':
-                exist->i = 1;
-                break;
-            case 'J':
-                exist->j = 1;
-                break;
-            case 'K':
-                exist->k = 1;
-                break;
-            case 'F':
-                exist->f = 1;
-                break;
-            case 'S':
-                exist->s = 1;
-                break;
-        }
-    }
-    
-}
 void ExcuteGCode(char *gcode){
     struct Exist exist;
     // G00 G01 G02 G03 G90 G91 G92 M02 M03 M04 M17 M18 

@@ -1,5 +1,6 @@
 import serial
-
+import getopt
+import sys
 
 ser = None
 flag = False
@@ -45,8 +46,22 @@ def send():
         ser.write((l.strip() + "\n").encode("ASCII"))
         ser.read(1);
 
+
+
+
+
+optlist, args = getopt.getopt(sys.argv[1:], 'f:')
+if optlist:
+    f = open(optlist[0][1])
+    for l in f:
+        print(l.strip())
+        ser.write((l.strip() + "\n").encode("ASCII"))
+        ser.read(1);
+
 print("Welcome to CNC430 Contorl Program!")
 print("type in commands to operate; help to list commands")
+
+
 
 while True:
     comm = input(">")
@@ -73,3 +88,4 @@ while True:
     else:
         print("I can't get you ;(")
         send
+

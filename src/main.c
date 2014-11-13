@@ -211,9 +211,9 @@ int main()
 	serial_rx_queue = xQueueCreate(1, sizeof(char));
 
 	/* Create a task to output text read from romfs. */
-	xTaskCreate(gcode_command_prompt,
-	            "CLI",
-	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
+	//xTaskCreate(gcode_command_prompt,
+	//            "CLI",
+	//            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
 
 	xTaskCreate(CNC_controller_depatch_task,
 	            "CNC",

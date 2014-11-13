@@ -177,7 +177,7 @@ void G02(char gcode[], struct Exist *exist){
     for (float theta = theta1; theta<theta2; theta+=0.1)
         
 }*/
-void ExcuteGCode(char *gcode){
+uint32_t ExcuteGCode(char *gcode){
     struct Exist exist;
     struct Vector v1;
     uint32_t s;
@@ -210,6 +210,8 @@ void ExcuteGCode(char *gcode){
     }else if (strncmp(gcode, "G92", 3) == 0){
         retriveParameters(gcode, &exist, &v1, NULL, NULL, NULL);
         G92(v1, &exist);
+    }else if (strncmp(gcode, "M02", 3) == 0){
+        return 1;
     }else if (strncmp(gcode, "M03", 3) == 0){
         retriveParameters(gcode, &exist, NULL, NULL, NULL, &s);
         M03(s, &exist);
@@ -220,6 +222,7 @@ void ExcuteGCode(char *gcode){
     }else if (strncmp(gcode, "M18", 3) == 0){
         CNC_DisableStepper();
     }
+    return 0;
 }
 
 

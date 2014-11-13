@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-void ExcuteGCode(char *gcode);
+uint32_t ExcuteGCode(char *gcode);
 
 struct Exist{ 
     uint32_t x :1;

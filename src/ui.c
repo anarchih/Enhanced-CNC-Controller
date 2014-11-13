@@ -5,8 +5,11 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "fio.h"
 #include "clib.h"
+
 #include "cnc-controller.h"
+#include "gcodeinter.h"
 #include "ui.h"
 #include "newDraw.h"
 
@@ -29,6 +32,7 @@ extern QueueHandle_t   operationQueue;
 /* main UI */
 struct UI_Btn btnJogMode;
 struct UI_Btn btnSpindleSetting;
+struct UI_Btn btnGcodeShell;
 
 /* jog UI */
 struct UI_Btn btnXForward;
@@ -53,6 +57,7 @@ struct UI_Btn btnExit;
 static void init(){
     SET_BTN(btnJogMode, 25, 25, 50, 50, "JOG");
     SET_BTN(btnSpindleSetting, 125, 25, 50, 50, "Spindle");
+    SET_BTN(btnGcodeShell, 225, 25, 50, 50, "G-Code");
 
     SET_BTN(btnXFYF, 25, 25, 50, 50, "X+Y+");
     SET_BTN(btnXFYR, 165, 25, 50, 50, "X+Y-");
@@ -264,6 +269,31 @@ static int spindleUI_handleInput()
     return 0;
 }
 
+static void gcodeUI_render()
+{
+    clear();
+
+    LCD_SetTextColor(LCD_COLOR_RED);
+
+    new_LCD_DisplayStringLine(4, 70, (uint8_t*) "GCODE");
+
+    drawBtn(&btnExit);
+
+    new_Present();
+}
+
+static int gcodeUI_handleInput()
+{
+    uint32_t ret = 0;
+	char buf[128];
+
+	fio_printf(1, "\rWelcome to GCode Shell\r\n");
+    fio_read(0, buf, 127);
+    ret = ExcuteGCode(buf);
+    fio_printf(1, "\x06");
+    return ret;
+}
+
 void mainUI(void *pvParameters){
     LCD_SetFont(&Font12x12);
     init();
@@ -298,6 +328,24 @@ void spindleUI(void){
         back = spindleUI_handleInput();
 
         spindleUI_render();
+
+        if (back)
+            return;
+
+        vTaskDelay(xDelay);
+    }
+}
+
+void gcodeUI(void){
+    uint8_t back = 0;
+
+    while(1){
+	    fio_printf(1, "\rWelcome to GCode Shell\r\n");
+        fio_printf(1, ">");
+
+        back = gcodeUI_handleInput();
+
+        gcodeUI_render();
 
         if (back)
             return;

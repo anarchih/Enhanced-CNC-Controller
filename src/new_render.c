@@ -41,7 +41,8 @@ void new_DisplayStringLine(uint16_t startX, uint16_t startY, uint8_t *ptr)
 {  
     uint16_t currentPosY = startY;
 
-    while ((currentPosY < LCD_PIXEL_WIDTH) && ((*ptr != 0) & (((currentPosY + LCD_GetFont()->Width) & 0xFFFF) >= LCD_GetFont()->Width))) {
+    while ((currentPosY < LCD_PIXEL_WIDTH) &&
+            ((*ptr != 0) & (((currentPosY + LCD_GetFont()->Width) & 0xFFFF) >= LCD_GetFont()->Width))) {
         LCD_DisplayChar(startX, currentPosY, *ptr);
         currentPosY += LCD_GetFont()->Width;
         ptr++;

@@ -9,6 +9,7 @@
 #include "clib.h"
 
 #include "cnc-controller.h"
+#include "cnc_misc.h"
 #include "gcodeinter.h"
 #include "ui.h"
 #include "new_render.h"
@@ -41,6 +42,11 @@ struct new_Button jogUI_xRYFButton;
 struct new_Button jogUI_xFYRButton;
 struct new_Button jogUI_fastSpeedToggleButton;
 
+struct new_Point jogUI_centerOfControlPad;
+struct new_Point jogUI_centerOfControlInput;
+const int32_t jogUI_radiusOfControlPad = 95;
+const int32_t jogUI_radiusOfControlInput = 5;
+
 /* Sharing UI */
 struct new_Button share_exitButton;
 
@@ -65,6 +71,12 @@ static void init(){
     setupButton(jobUI_yReverseButton, 165, 100, 50, 50, "Y-");
     setupButton(jobUI_zForwardButton, 25, 245, 50, 50, "Z+");
     setupButton(jogUI_zReverseButton, 165, 245, 50, 50, "Z-");
+
+    jogUI_centerOfControlPad.x = 120;
+    jogUI_centerOfControlPad.y = 120;
+
+    jogUI_centerOfControlInput.x = 120;
+    jogUI_centerOfControlInput.y = 120;
 
     setupButton(spindleUI_haltButton, 165, 245, 50, 50, "HALT");
     setupButton(share_exitButton, 95, 245, 50, 50, "BACK");
@@ -101,77 +113,90 @@ static void mainUI_render()
 
 static int jogUI_handleInput()
 {
-    static uint32_t settedSpeed = 200;
-    static uint32_t movementAmount = 20;
+//    static uint32_t settedSpeed = 200;
+//    static uint32_t movementAmount = 20;
 
     touchPannelInfo = IOE_TP_GetState(); 
     touchPannelPoint.x = touchPannelInfo->X;
     touchPannelPoint.y = touchPannelInfo->Y;
 
     if( touchPannelInfo->TouchDetected ){
-        if(new_PointIsInRect(&jobUI_xForwardButton.rect, &touchPannelPoint)){
-            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(settedSpeed);
-            CNC_Move(movementAmount, 0, 0);
-            vTaskDelay(50 / portTICK_PERIOD_MS);
-        }else if(new_PointIsInRect(&jogUI_xReverseButton.rect, &touchPannelPoint)){
-            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(settedSpeed);
-            CNC_Move((-1) * movementAmount, 0, 0);
-            vTaskDelay(50 / portTICK_PERIOD_MS);
-        }else if(new_PointIsInRect(&jogUI_yForwardButton.rect, &touchPannelPoint)){
-            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(settedSpeed);
-            CNC_Move(0, movementAmount, 0);
-            vTaskDelay(50 / portTICK_PERIOD_MS);
-        }else if(new_PointIsInRect(&jobUI_yReverseButton.rect, &touchPannelPoint)){
-            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(settedSpeed);
-            CNC_Move(0, (-1) * movementAmount, 0);
-            vTaskDelay(50 / portTICK_PERIOD_MS);
-        }else if(new_PointIsInRect(&jogUI_xFYFButton.rect, &touchPannelPoint)){
-            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(settedSpeed);
-            CNC_Move(movementAmount, movementAmount, 0);
-            vTaskDelay(50 / portTICK_PERIOD_MS);
-        }else if(new_PointIsInRect(&jogUI_xFYRButton.rect, &touchPannelPoint)){
-            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(settedSpeed);
-            CNC_Move(movementAmount, (-1) * movementAmount, 0);
-            vTaskDelay(50 / portTICK_PERIOD_MS);
-        }else if(new_PointIsInRect(&jogUI_xRYFButton.rect, &touchPannelPoint)){
-            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(settedSpeed);
-            CNC_Move((-1) * movementAmount, movementAmount, 0);
-            vTaskDelay(50 / portTICK_PERIOD_MS);
-        }else if(new_PointIsInRect(&jobUI_xRYRButton.rect, &touchPannelPoint)){
-            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(settedSpeed);
-            CNC_Move((-1) * movementAmount, -movementAmount, 0);
-            vTaskDelay(50 / portTICK_PERIOD_MS);
-        }else if(new_PointIsInRect(&jobUI_zForwardButton.rect, &touchPannelPoint)){
-            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(settedSpeed);
-            CNC_Move(0, 0, movementAmount);
-            vTaskDelay(50 / portTICK_PERIOD_MS);
-        }else if(new_PointIsInRect(&jogUI_zReverseButton.rect, &touchPannelPoint)){
-            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CNC_SetFeedrate(settedSpeed);
-            CNC_Move(0, 0, (-1) * movementAmount);
-            vTaskDelay(50 / portTICK_PERIOD_MS);
-        }else if(new_PointIsInRect(&jogUI_fastSpeedToggleButton.rect, &touchPannelPoint)){
-            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            if(settedSpeed == 200){
-                settedSpeed = 600; 
-                movementAmount = 100;
-            }else{
-                settedSpeed = 200; 
-                movementAmount = 20;
-            }
-            vTaskDelay(100 / portTICK_PERIOD_MS);
-        }else if(new_PointIsInRect(&share_exitButton.rect, &touchPannelPoint)){
-            return 1;
+//        if(new_PointIsInRect(&jobUI_xForwardButton.rect, &touchPannelPoint)){
+//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+//            CNC_SetFeedrate(settedSpeed);
+//            CNC_Move(movementAmount, 0, 0);
+//            vTaskDelay(50 / portTICK_PERIOD_MS);
+//        }else if(new_PointIsInRect(&jogUI_xReverseButton.rect, &touchPannelPoint)){
+//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+//            CNC_SetFeedrate(settedSpeed);
+//            CNC_Move((-1) * movementAmount, 0, 0);
+//            vTaskDelay(50 / portTICK_PERIOD_MS);
+//        }else if(new_PointIsInRect(&jogUI_yForwardButton.rect, &touchPannelPoint)){
+//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+//            CNC_SetFeedrate(settedSpeed);
+//            CNC_Move(0, movementAmount, 0);
+//            vTaskDelay(50 / portTICK_PERIOD_MS);
+//        }else if(new_PointIsInRect(&jobUI_yReverseButton.rect, &touchPannelPoint)){
+//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+//            CNC_SetFeedrate(settedSpeed);
+//            CNC_Move(0, (-1) * movementAmount, 0);
+//            vTaskDelay(50 / portTICK_PERIOD_MS);
+//        }else if(new_PointIsInRect(&jogUI_xFYFButton.rect, &touchPannelPoint)){
+//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+//            CNC_SetFeedrate(settedSpeed);
+//            CNC_Move(movementAmount, movementAmount, 0);
+//            vTaskDelay(50 / portTICK_PERIOD_MS);
+//        }else if(new_PointIsInRect(&jogUI_xFYRButton.rect, &touchPannelPoint)){
+//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+//            CNC_SetFeedrate(settedSpeed);
+//            CNC_Move(movementAmount, (-1) * movementAmount, 0);
+//            vTaskDelay(50 / portTICK_PERIOD_MS);
+//        }else if(new_PointIsInRect(&jogUI_xRYFButton.rect, &touchPannelPoint)){
+//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+//            CNC_SetFeedrate(settedSpeed);
+//            CNC_Move((-1) * movementAmount, movementAmount, 0);
+//            vTaskDelay(50 / portTICK_PERIOD_MS);
+//        }else if(new_PointIsInRect(&jobUI_xRYRButton.rect, &touchPannelPoint)){
+//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+//            CNC_SetFeedrate(settedSpeed);
+//            CNC_Move((-1) * movementAmount, -movementAmount, 0);
+//            vTaskDelay(50 / portTICK_PERIOD_MS);
+//        }else if(new_PointIsInRect(&jobUI_zForwardButton.rect, &touchPannelPoint)){
+//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+//            CNC_SetFeedrate(settedSpeed);
+//            CNC_Move(0, 0, movementAmount);
+//            vTaskDelay(50 / portTICK_PERIOD_MS);
+//        }else if(new_PointIsInRect(&jogUI_zReverseButton.rect, &touchPannelPoint)){
+//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+//            CNC_SetFeedrate(settedSpeed);
+//            CNC_Move(0, 0, (-1) * movementAmount);
+//            vTaskDelay(50 / portTICK_PERIOD_MS);
+//        }else if(new_PointIsInRect(&jogUI_fastSpeedToggleButton.rect, &touchPannelPoint)){
+//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+//            if(settedSpeed == 200){
+//                settedSpeed = 600; 
+//                movementAmount = 100;
+//            }else{
+//                settedSpeed = 200; 
+//                movementAmount = 20;
+//            }
+//            vTaskDelay(100 / portTICK_PERIOD_MS);
+//        }else if(new_PointIsInRect(&share_exitButton.rect, &touchPannelPoint)){
+//            return 1;
+//        }
+
+        if ((ipow(touchPannelPoint.x - jogUI_centerOfControlInput.x, 2) +
+            (ipow(touchPannelPoint.y - jogUI_centerOfControlInput.y, 2))) <= ipow(jogUI_radiusOfControlPad, 2)) {
+
+            jogUI_centerOfControlInput.x = touchPannelPoint.x;
+            jogUI_centerOfControlInput.y = touchPannelPoint.y;
         }
+
+        if(new_PointIsInRect(&share_exitButton.rect, &touchPannelPoint))
+            return 1;
+    } else {
+        jogUI_centerOfControlInput.x = jogUI_centerOfControlPad.x;
+        jogUI_centerOfControlInput.y = jogUI_centerOfControlPad.y;
     }
 
     return 0;
@@ -185,19 +210,25 @@ static void jogUI_render()
 
     new_DisplayStringLine(4, 70, (uint8_t*) "JOG MODE");
 
-    new_DrawButton(&jogUI_xFYFButton);
-    new_DrawButton(&jobUI_xRYRButton);
-    new_DrawButton(&jogUI_xFYRButton);
-    new_DrawButton(&jogUI_xRYFButton);
-    new_DrawButton(&jogUI_fastSpeedToggleButton);
-    new_DrawButton(&jobUI_zForwardButton);
-    new_DrawButton(&jogUI_zReverseButton);
-    new_DrawButton(&jobUI_xForwardButton);
-    new_DrawButton(&jogUI_xReverseButton);
-    new_DrawButton(&jogUI_yForwardButton);
-    new_DrawButton(&jobUI_yReverseButton);
-    new_DrawButton(&jobUI_zForwardButton);
-    new_DrawButton(&jogUI_zReverseButton);
+//    new_DrawButton(&jogUI_xFYFButton);
+//    new_DrawButton(&jobUI_xRYRButton);
+//    new_DrawButton(&jogUI_xFYRButton);
+//    new_DrawButton(&jogUI_xRYFButton);
+//    new_DrawButton(&jogUI_fastSpeedToggleButton);
+//    new_DrawButton(&jobUI_zForwardButton);
+//    new_DrawButton(&jogUI_zReverseButton);
+//    new_DrawButton(&jobUI_xForwardButton);
+//    new_DrawButton(&jogUI_xReverseButton);
+//    new_DrawButton(&jogUI_yForwardButton);
+//    new_DrawButton(&jobUI_yReverseButton);
+//    new_DrawButton(&jobUI_zForwardButton);
+//    new_DrawButton(&jogUI_zReverseButton);
+
+
+    LCD_SetColors(LCD_COLOR_RED, LCD_COLOR_BLACK);
+    LCD_DrawCircle(jogUI_centerOfControlPad.x, jogUI_centerOfControlPad.y, jogUI_radiusOfControlPad);
+    LCD_DrawCircle(jogUI_centerOfControlInput.x, jogUI_centerOfControlInput.y, jogUI_radiusOfControlInput);
+
     new_DrawButton(&share_exitButton);
 
     new_Present();

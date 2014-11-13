@@ -36,3 +36,18 @@ float rsqrt( float number )
  
     return y;
 }
+
+int32_t ipow(int32_t base, int32_t exp)
+{
+    int result = 1;
+    while (exp)
+    {
+        if (exp & 1)
+            result *= base;
+        exp >>= 1;
+        base *= base;
+
+    }
+
+    return result;
+}

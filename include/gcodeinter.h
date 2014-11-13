@@ -1,5 +1,8 @@
 #ifndef GCODE_H
 #define GCODE_H
+
+#include <stdint.h>
+
 void ExcuteGCode(char *gcode);
 
 struct Exist{ 

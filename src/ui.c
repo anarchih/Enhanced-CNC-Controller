@@ -11,7 +11,7 @@
 #include "cnc-controller.h"
 #include "gcodeinter.h"
 #include "ui.h"
-#include "newDraw.h"
+#include "new_render.h"
 
 #define SET_BTN(BTN, X, Y, W, H, NAME); \
     do { \
@@ -54,6 +54,8 @@ struct UI_Btn btnSpeedDown;
 /* Sharing UI */
 struct UI_Btn btnExit;
 
+int32_t spindleSpeed = 0;
+
 static void init(){
     SET_BTN(btnJogMode, 25, 25, 50, 50, "JOG");
     SET_BTN(btnSpindleSetting, 125, 25, 50, 50, "Spindle");
@@ -80,7 +82,7 @@ static void init(){
 
 static void drawBtn(struct UI_Btn *btn){
     LCD_DrawRect(btn->rect.x, btn->rect.y, btn->rect.height, btn->rect.width);
-    new_LCD_DisplayStringLine((btn->rect.y + btn->rect.height + 4),
+    new_DisplayStringLine((btn->rect.y + btn->rect.height + 4),
             btn->rect.x + ((btn->rect.width - (LCD_GetFont()->Width * strlen(btn->name))) / 2),
             (uint8_t*) btn->name);
 }
@@ -93,12 +95,6 @@ static uint32_t isInRect(struct UI_Rect *rect, uint32_t point_x, uint32_t point_
         return 1;
     }
     return 0;
-}
-
-static void clear()
-{
-    LCD_SetColors(LCD_COLOR_BLACK, LCD_COLOR_BLACK);
-    LCD_DrawFullRect(0, 0, LCD_PIXEL_WIDTH, LCD_PIXEL_HEIGHT);
 }
 
 static void mainUI_handleInput()
@@ -116,13 +112,13 @@ static void mainUI_handleInput()
 
 static void mainUI_render()
 {
-    clear();
+    new_Clear(LCD_COLOR_BLACK);
 
     LCD_SetTextColor(LCD_COLOR_RED);
     drawBtn(&btnJogMode);
     drawBtn(&btnSpindleSetting);
 
-    new_LCD_DisplayStringLine(4, 55, (uint8_t*) "SELECT MODE");
+    new_DisplayStringLine(4, 55, (uint8_t*) "SELECT MODE");
 
     new_Present();
 }
@@ -204,11 +200,11 @@ static int jogUI_handleInput()
 
 static void jogUI_render()
 {
-    clear();
+    new_Clear(LCD_COLOR_BLACK);
 
     LCD_SetTextColor(LCD_COLOR_RED);
 
-    new_LCD_DisplayStringLine(4, 70, (uint8_t*) "JOG MODE");
+    new_DisplayStringLine(4, 70, (uint8_t*) "JOG MODE");
 
     drawBtn(&btnXFYF);
     drawBtn(&btnXRYR);
@@ -230,15 +226,18 @@ static void jogUI_render()
 
 static void spindleUI_render()
 {
-    clear();
+    new_Clear(LCD_COLOR_BLACK);
 
     LCD_SetTextColor(LCD_COLOR_RED);
+    new_DisplayStringLine(4, 70, (uint8_t*) "SPINDLE");
 
-    new_LCD_DisplayStringLine(4, 70, (uint8_t*) "SPINDLE");
-
-    drawBtn(&btnSpeedUp);
-    drawBtn(&btnSpeedDown);
     drawBtn(&btnExit);
+
+    LCD_SetTextColor(LCD_COLOR_RED);
+    LCD_DrawFullRect(24, 24, 52, 202);
+
+    LCD_SetTextColor(LCD_COLOR_BLACK);
+    LCD_DrawFullRect(25, 25, 50, spindleSpeed * 2);
 
     new_Present();
 }
@@ -248,34 +247,41 @@ static int spindleUI_handleInput()
     tp = IOE_TP_GetState(); 
 
     if( tp->TouchDetected ){
-        if(isInRect(&btnSpeedUp.rect, tp->X, tp->Y)){
-            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CurrentSpindleSpeed += 10;
-            if(CurrentSpindleSpeed > 100)
-                CurrentSpindleSpeed = 100;
-            CNC_SetSpindleSpeed(CurrentSpindleSpeed);
-            vTaskDelay(100 / portTICK_PERIOD_MS);
-        }else if(isInRect(&btnSpeedDown.rect, tp->X, tp->Y)){
-            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
-            CurrentSpindleSpeed -= 10;
-            if(CurrentSpindleSpeed < 0)
-                CurrentSpindleSpeed = 0;
-            CNC_SetSpindleSpeed(CurrentSpindleSpeed);
-            vTaskDelay(xDelay);
-        }else if(isInRect(&btnExit.rect, tp->X, tp->Y)){
+//        if(isInRect(&btnSpeedUp.rect, tp->X, tp->Y)){
+//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+//            CurrentSpindleSpeed += 10;
+//            if(CurrentSpindleSpeed > 100)
+//                CurrentSpindleSpeed = 100;
+//            CNC_SetSpindleSpeed(CurrentSpindleSpeed);
+//            vTaskDelay(100 / portTICK_PERIOD_MS);
+//
+//        }else if(isInRect(&btnSpeedDown.rect, tp->X, tp->Y)){
+//            while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
+//            CurrentSpindleSpeed -= 10;
+//            if(CurrentSpindleSpeed < 0)
+//                CurrentSpindleSpeed = 0;
+//            CNC_SetSpindleSpeed(CurrentSpindleSpeed);
+//            vTaskDelay(xDelay);
+        if(isInRect(&btnExit.rect, tp->X, tp->Y))
             return 1;
-        }
+
+        spindleSpeed = (tp->Y - 25) / 2;
+        if (spindleSpeed < 0)
+            spindleSpeed = 0;
+        if (spindleSpeed > 100)
+            spindleSpeed = 100;
+        //}
     } 
     return 0;
 }
 
 static void gcodeUI_render()
 {
-    clear();
+    new_Clear(LCD_COLOR_BLACK);
 
     LCD_SetTextColor(LCD_COLOR_RED);
 
-    new_LCD_DisplayStringLine(4, 70, (uint8_t*) "GCODE");
+    new_DisplayStringLine(4, 70, (uint8_t*) "GCODE");
 
     drawBtn(&btnExit);
 

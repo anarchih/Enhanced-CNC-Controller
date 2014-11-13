@@ -23,4 +23,6 @@ void new_Init();
 void new_Clear(uint16_t color);
 void new_Present();
 
+void new_DisplayStringLine(uint16_t startX, uint16_t startY, uint8_t *ptr);
+
 #endif /* NEW_DRAW_H */

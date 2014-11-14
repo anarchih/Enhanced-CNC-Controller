@@ -293,16 +293,33 @@ static void gcodeUI_render()
     new_Present();
 }
 
-static int gcodeUI_handleInput()
+static void gcodeUI_gcodeJob()
 {
-    uint32_t ret = 0;
 	char buf[128];
 
-	fio_printf(1, "\rWelcome to GCode Shell\r\n");
-    fio_read(0, buf, 127);
-    ret = ExcuteGCode(buf);
-    fio_printf(1, "\x06");
-    return ret;
+    while (1) {
+        fio_printf(1, "\rWelcome to GCode Shell\r\n");
+        fio_printf(1, ">");
+
+        fio_read(0, buf, 127);
+        ExcuteGCode(buf);
+
+        fio_printf(1, "\x06");
+    }
+}
+
+static int gcodeUI_handleInput()
+{
+    touchPannelInfo = IOE_TP_GetState(); 
+    touchPannelPoint.x = touchPannelInfo->X;
+    touchPannelPoint.y = touchPannelInfo->Y;
+
+    if (touchPannelInfo->TouchDetected) {
+        if (new_PointIsInRect(&share_exitButton.rect, &touchPannelPoint))
+            return 1;
+    }
+
+    return 0;
 }
 
 void mainUI(void *pvParameters){
@@ -349,17 +366,23 @@ void spindleUI(void){
 
 void gcodeUI(void){
     uint8_t back = 0;
+    TaskHandle_t xHandle = NULL;
+
+    xTaskCreate(gcodeUI_gcodeJob,
+            "GCODE_JOB",
+            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, &xHandle);
 
     while(1){
-	    fio_printf(1, "\rWelcome to GCode Shell\r\n");
-        fio_printf(1, ">");
 
         back = gcodeUI_handleInput();
 
         gcodeUI_render();
 
-        if (back)
+        if (back) {
+            if (xHandle != NULL)
+                vTaskDelete(xHandle);
             return;
+        }
 
         vTaskDelay(xDelay);
     }

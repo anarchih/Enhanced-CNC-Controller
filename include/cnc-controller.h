@@ -13,12 +13,17 @@
 
 #define StepPinPort GPIOE
 #define DirPinPort GPIOC
+#define EnPinPort GPIOC
 #define XStepPin GPIO_Pin_2
 #define YStepPin GPIO_Pin_3
 #define ZStepPin GPIO_Pin_4
 #define XDirPin GPIO_Pin_11
 #define YDirPin GPIO_Pin_8
 #define ZDirPin GPIO_Pin_13
+#define XEnPin GPIO_Pin_3
+#define YEnPin GPIO_Pin_4
+#define ZEnPin GPIO_Pin_5
+
 
 enum CNC_Opcodes{
     moveStepper = 1,

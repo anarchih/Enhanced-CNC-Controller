@@ -51,6 +51,8 @@ const int32_t jogUI_radiusOfControlInput = 5;
 struct new_Button share_exitButton;
 
 /* SpindleUI */
+struct new_Button spindleUI_speedUpButton;
+struct new_Button spindleUI_speedDownButton;
 struct new_Button spindleUI_haltButton;
 
 int32_t spindleSpeed = 1;
@@ -58,7 +60,7 @@ int32_t spindleSpeed = 1;
 static void init(){
     setupButton(mainUI_jogModeButton, 25, 25, 50, 50, "JOG");
     setupButton(mainUI_spindleSettingButton, 125, 25, 50, 50, "Spindle");
-    setupButton(mainUI_gcodeShellButton, 225, 25, 50, 50, "G-Code");
+    setupButton(mainUI_gcodeShellButton, 25, 125, 50, 50, "G-Code");
 
     setupButton(jogUI_xFYFButton, 25, 25, 50, 50, "X+Y+");
     setupButton(jogUI_xFYRButton, 165, 25, 50, 50, "X+Y-");
@@ -79,6 +81,9 @@ static void init(){
     jogUI_centerOfControlInput.y = 120;
 
     setupButton(spindleUI_haltButton, 165, 245, 50, 50, "HALT");
+    setupButton(spindleUI_speedUpButton, 95, 25, 50, 50, "SPEED+");
+    setupButton(spindleUI_speedDownButton, 95, 175, 50, 50, "SPEED-");
+
     setupButton(share_exitButton, 95, 245, 50, 50, "BACK");
 }
 
@@ -94,6 +99,8 @@ static void mainUI_handleInput()
             jogUI();
         }else if(new_PointIsInRect(&mainUI_spindleSettingButton.rect, &touchPannelPoint)){
             spindleUI();
+        }else if(new_PointIsInRect(&mainUI_gcodeShellButton.rect, &touchPannelPoint)){
+            gcodeUI();
         }
     }
 }
@@ -105,6 +112,7 @@ static void mainUI_render()
     LCD_SetTextColor(LCD_COLOR_RED);
     new_DrawButton(&mainUI_jogModeButton);
     new_DrawButton(&mainUI_spindleSettingButton);
+    new_DrawButton(&mainUI_gcodeShellButton);
 
     new_DisplayStringLine(4, 55, (uint8_t*) "SELECT MODE");
 
@@ -257,6 +265,8 @@ static void spindleUI_render()
     new_DisplayStringLine(225 + 4, 25, (uint8_t*) itoa("1234567890", spindleSpeed, 10));
 
     new_DrawButton(&spindleUI_haltButton);
+    new_DrawButton(&spindleUI_speedUpButton);
+    new_DrawButton(&spindleUI_speedDownButton);
 
     new_Present();
 }
@@ -267,24 +277,34 @@ static int spindleUI_handleInput()
     touchPannelPoint.x = touchPannelInfo->X;
     touchPannelPoint.y = touchPannelInfo->Y;
 
-    if( touchPannelInfo->TouchDetected ) {
-        if(new_PointIsInRect(&share_exitButton.rect, &touchPannelPoint))
+    if (touchPannelInfo->TouchDetected) {
+        if (new_PointIsInRect(&share_exitButton.rect, &touchPannelPoint))
             return 1;
 
-        if ((touchPannelInfo->X < 75) && (touchPannelInfo->X > 25)) {
-            spindleSpeed = (225 - touchPannelInfo->Y) / 2;
-            if (spindleSpeed < 1)
-                spindleSpeed = 1;
+        if (new_PointIsInRect(&spindleUI_speedUpButton.rect, &touchPannelPoint)) {
+            spindleSpeed += 5;
             if (spindleSpeed > 100)
                 spindleSpeed = 100;
 
-            while(uxQueueMessagesWaiting( operationQueue ))
+            while (uxQueueMessagesWaiting(operationQueue))
+                ; // Clear Movements
+            CNC_SetSpindleSpeed(spindleSpeed);
+            vTaskDelay(xDelay);
+        }
+
+        if (new_PointIsInRect(&spindleUI_speedDownButton.rect, &touchPannelPoint)) {
+            spindleSpeed -= 5;
+            if (spindleSpeed < 0)
+                spindleSpeed = 0;
+
+            while (uxQueueMessagesWaiting(operationQueue))
                 ; // Clear Movements
 
             CNC_SetSpindleSpeed(spindleSpeed);
             vTaskDelay(xDelay);
         }
     } 
+
     return 0;
 }
 

@@ -191,7 +191,6 @@ int main()
 
     IOE_Config();
 
-    GPIO_SetBits(GPIOG, GPIO_Pin_13); //Logic Analyser Debug Trigger
     //GPIO_SetBits(GPIOC, GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13); //Logic Analyser Debug Trigger
     //GPIO_ToggleBits(GPIOC, GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13); //Logic Analyser Debug Trigger
 
@@ -222,7 +221,7 @@ int main()
 
 	xTaskCreate(mainUI,
 	            "UI",
-	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
+	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
 #if 0
 	/* Create a task to record system log. */
 	xTaskCreate(system_logger,

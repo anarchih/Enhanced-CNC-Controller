@@ -4,4 +4,4 @@ load
 monitor reset
 monitor halt
 
-b line_move
+b cnc-controller.c:120

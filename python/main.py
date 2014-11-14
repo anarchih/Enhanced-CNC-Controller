@@ -50,9 +50,10 @@ def send():
 
 
 
-optlist, args = getopt.getopt(sys.argv[1:], 'f:')
+optlist, args = getopt.getopt(sys.argv[1:], 'f:p:')
 if optlist:
     f = open(optlist[0][1])
+    ser = serial.Serial(optlist[1][1], 9600, timeout=None)
     for l in f:
         print(l.strip())
         ser.write((l.strip() + "\n").encode("ASCII"))
@@ -60,8 +61,6 @@ if optlist:
 
 print("Welcome to CNC430 Contorl Program!")
 print("type in commands to operate; help to list commands")
-
-
 
 while True:
     comm = input(">")

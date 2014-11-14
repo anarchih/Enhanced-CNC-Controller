@@ -52,6 +52,13 @@ void GPIOB_Configuration(void)
     GPIO_InitStructureB.GPIO_PuPd = GPIO_PuPd_NOPULL;
     GPIO_InitStructureB.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOB, &GPIO_InitStructureB);
+
+    GPIO_InitStructureB.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15; 
+    GPIO_InitStructureB.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStructureB.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructureB.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStructureB.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOB, &GPIO_InitStructureB);
 }
 
 void GPIOC_Configuration(void)
@@ -68,10 +75,10 @@ void GPIOC_Configuration(void)
 void GPIOG_Configuration(void)
 {
     GPIO_InitTypeDef GPIO_InitStructureG;
-    GPIO_InitStructureG.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14; 
-    GPIO_InitStructureG.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructureG.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_13 | GPIO_Pin_14; 
+    GPIO_InitStructureG.GPIO_Mode = GPIO_Mode_IN;
     GPIO_InitStructureG.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructureG.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_InitStructureG.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_InitStructureG.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOG, &GPIO_InitStructureG);
 }

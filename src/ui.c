@@ -190,7 +190,7 @@ static int jogUI_handleInput()
         }else if(isInRect(&btnFast.rect, tp->X, tp->Y)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
             if(settedSpeed == 200){
-                settedSpeed = 600; 
+                settedSpeed = 800; 
                 movementAmount = 100;
             }else{
                 settedSpeed = 200; 

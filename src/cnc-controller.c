@@ -52,8 +52,9 @@ static void setStepperState(uint32_t state){
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
 
     if(state){
+        GPIO_ResetBits(EnPinPort, XEnPin | YEnPin | ZEnPin);
     }else{
-        //TODO: Set GPIO
+        GPIO_SetBits(EnPinPort, XEnPin | YEnPin | ZEnPin);
     }
     
     stepperState = state;
@@ -73,8 +74,6 @@ static void updateFeedrate(uint32_t feedrate){
 void TIM2_IRQHandler(void){
     struct CNC_Movement_t movement;
     BaseType_t xTaskWokenByReceive = pdFALSE;
-
-    GPIO_ToggleBits(GPIOG, GPIO_Pin_13);
 
     if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET){
         if(timer2State){

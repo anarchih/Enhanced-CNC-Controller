@@ -57,7 +57,7 @@ void GPIOB_Configuration(void)
 void GPIOC_Configuration(void)
 {
     GPIO_InitTypeDef GPIO_InitStructureC;
-    GPIO_InitStructureC.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_8; 
+    GPIO_InitStructureC.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_8 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5; 
     GPIO_InitStructureC.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStructureC.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructureC.GPIO_PuPd = GPIO_PuPd_NOPULL;

@@ -59,10 +59,10 @@ static void init(){
     SET_BTN(btnSpindleSetting, 125, 25, 50, 50, "Spindle");
     SET_BTN(btnGcodeShell, 25, 125, 50, 50, "G-Code");
 
-    SET_BTN(btnXFYF, 25, 25, 50, 50, "X+Y+");
+    SET_BTN(btnXFYF, 165, 175, 50, 50, "X+Y+");
     SET_BTN(btnXFYR, 165, 25, 50, 50, "X+Y-");
     SET_BTN(btnXRYF, 25, 175, 50, 50, "X-Y+");
-    SET_BTN(btnXRYR, 165, 175, 50, 50, "X-Y-");
+    SET_BTN(btnXRYR, 25, 25, 50, 50, "X-Y-");
     SET_BTN(btnXForward, 165, 100, 50, 50, "X+");
     SET_BTN(btnFast, 95, 100, 50, 50, "F / S");
     SET_BTN(btnXReverse, 25, 100, 50, 50, "X-");

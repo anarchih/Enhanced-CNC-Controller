@@ -54,6 +54,7 @@ optlist, args = getopt.getopt(sys.argv[1:], 'f:p:')
 if optlist:
     f = open(optlist[0][1])
     ser = serial.Serial(optlist[1][1], 9600, timeout=None)
+    flag = True
     for l in f:
         print(l.strip())
         ser.write((l.strip() + "\n").encode("ASCII"))

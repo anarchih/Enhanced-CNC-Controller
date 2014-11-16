@@ -5,32 +5,32 @@
 #include "queue.h"
 #include "semphr.h"
 
-#define X_STEP_LENGTH_MM 0.00625
 #define Y_STEP_LENGTH_MM 0.00625
+#define X_STEP_LENGTH_MM 0.00625
 #define Z_STEP_LENGTH_MM 0.004
-#define X_STEP_LENGTH_INCH 0.00024606299
 #define Y_STEP_LENGTH_INCH 0.00024606299
+#define X_STEP_LENGTH_INCH 0.00024606299
 #define Z_STEP_LENGTH_INCH 0.00015748031
 
-#define X_STEP_LIMIT 200 / X_STEP_LENGTH_MM
-#define Y_STEP_LIMIT 170 / Y_STEP_LENGTH_MM
+#define Y_STEP_LIMIT 200 / X_STEP_LENGTH_MM
+#define X_STEP_LIMIT 170 / Y_STEP_LENGTH_MM
 #define Z_STEP_LIMIT 25 / Z_STEP_LENGTH_MM
 
 #define StepPinPort GPIOE
 #define DirPinPort GPIOC
 #define EnPinPort GPIOC
 #define LimitPinPort GPIOG
-#define XStepPin GPIO_Pin_2
-#define YStepPin GPIO_Pin_3
+#define YStepPin GPIO_Pin_2
+#define XStepPin GPIO_Pin_3
 #define ZStepPin GPIO_Pin_4
-#define XDirPin GPIO_Pin_11
-#define YDirPin GPIO_Pin_8
+#define YDirPin GPIO_Pin_11
+#define XDirPin GPIO_Pin_8
 #define ZDirPin GPIO_Pin_13
-#define XEnPin GPIO_Pin_3
-#define YEnPin GPIO_Pin_4
+#define YEnPin GPIO_Pin_3
+#define XEnPin GPIO_Pin_4
 #define ZEnPin GPIO_Pin_5
-#define XLimitPin GPIO_Pin_9
-#define YLimitPin GPIO_Pin_13
+#define YLimitPin GPIO_Pin_9
+#define XLimitPin GPIO_Pin_13
 #define ZLimitPin GPIO_Pin_14
 
 enum CNC_Opcodes{

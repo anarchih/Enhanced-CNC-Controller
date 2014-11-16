@@ -63,11 +63,11 @@ static void init(){
     SET_BTN(btnXFYR, 165, 25, 50, 50, "X+Y-");
     SET_BTN(btnXRYF, 25, 175, 50, 50, "X-Y+");
     SET_BTN(btnXRYR, 165, 175, 50, 50, "X-Y-");
-    SET_BTN(btnXForward, 95, 25, 50, 50, "X+");
+    SET_BTN(btnXForward, 165, 100, 50, 50, "X+");
     SET_BTN(btnFast, 95, 100, 50, 50, "F / S");
-    SET_BTN(btnXReverse, 95, 175, 50, 50, "X-");
-    SET_BTN(btnYForward, 25, 100, 50, 50, "Y+");
-    SET_BTN(btnYReverse, 165, 100, 50, 50, "Y-");
+    SET_BTN(btnXReverse, 25, 100, 50, 50, "X-");
+    SET_BTN(btnYForward, 95, 175, 50, 50, "Y+");
+    SET_BTN(btnYReverse, 95, 25, 50, 50, "Y-");
     SET_BTN(btnZForward, 25, 245, 50, 50, "Z+");
     SET_BTN(btnZReverse, 165, 245, 50, 50, "Z-");
 

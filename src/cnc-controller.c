@@ -33,13 +33,12 @@ int32_t yPos = 0;
 int32_t zPos = 0;
 
 static void updateSpindleSpeed(uint32_t speed){
-    uint32_t delta;
-
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
     
     if(speed > 100)
         speed = 100;
-    if(speed < 25 && speed != 0)
+    TIM_SetCompare1(TIM3, 2400 * speed / 100);
+    /*if(speed < 25 && speed != 0)
         speed = 25;
     
     delta = speed - SpindleSpeed;
@@ -48,6 +47,7 @@ static void updateSpindleSpeed(uint32_t speed){
         vTaskDelay(200 / portTICK_PERIOD_MS);
     }
     SpindleSpeed = speed;
+    */
     return;
 }
 
@@ -102,15 +102,15 @@ void TIM2_IRQHandler(void){
                 }
                 //TODO: Shrink This
                 if(movement.x < 0){
-                    if(!xLimitState){
-                        movement.x = 0;
-                    }
-                    GPIO_SetBits(DirPinPort, XDirPin);
-                }else{
                     if(xPos >= X_STEP_LIMIT){
                         movement.x = 0;
                     }
                     GPIO_ResetBits(DirPinPort, XDirPin);
+                }else{
+                    if(!xLimitState){
+                        movement.x = 0;
+                    }
+                    GPIO_SetBits(DirPinPort, XDirPin);
                 }
 
                 if(movement.y < 0){

@@ -113,7 +113,7 @@ void TIM2_IRQHandler(void){
                     GPIO_SetBits(DirPinPort, XDirPin);
                 }
 
-                if(movement.y < 0){
+                if(movement.y > 0){
                     if(!yLimitState){
                         movement.y = 0;
                     }

@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include "host.h"
@@ -7,6 +9,7 @@
 #include "stm32_f429.h"
 #include "fio.h"
 #include "clib.h"
+#include "cnc_misc.h"
 
 #include "stm32f4xx_gpio.h"
 
@@ -20,18 +23,31 @@ SemaphoreHandle_t stepperYMutex;
 SemaphoreHandle_t stepperZMutex;
 
 uint32_t MovementSpeed;
+uint32_t SpindleSpeed = 0;
 
 uint32_t timer2State;
 
 uint32_t stepperState;
+int32_t xPos = 0;
+int32_t yPos = 0;
+int32_t zPos = 0;
 
 static void updateSpindleSpeed(uint32_t speed){
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
     
     if(speed > 100)
         speed = 100;
-
     TIM_SetCompare1(TIM3, 2400 * speed / 100);
+    /*if(speed < 25 && speed != 0)
+        speed = 25;
+    
+    delta = speed - SpindleSpeed;
+    for(uint32_t i = 0; i < abs_int(delta) / 5.0; i++){
+        TIM_SetCompare1(TIM3, 2400 * (SpindleSpeed + (delta / 5.0) * (i + 1)) / 100);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
+    }
+    SpindleSpeed = speed;
+    */
     return;
 }
 
@@ -39,8 +55,9 @@ static void setStepperState(uint32_t state){
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
 
     if(state){
+        GPIO_ResetBits(EnPinPort, XEnPin | YEnPin | ZEnPin);
     }else{
-        //TODO: Set GPIO
+        GPIO_SetBits(EnPinPort, XEnPin | YEnPin | ZEnPin);
     }
     
     stepperState = state;
@@ -60,46 +77,93 @@ static void updateFeedrate(uint32_t feedrate){
 void TIM2_IRQHandler(void){
     struct CNC_Movement_t movement;
     BaseType_t xTaskWokenByReceive = pdFALSE;
-
-    GPIO_ToggleBits(GPIOG, GPIO_Pin_13);
+    uint32_t xLimitState = 1; //TODO: pulled up, can cancel
+    uint32_t yLimitState = 1;
+    uint32_t zLimitState = 1;
 
     if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET){
         if(timer2State){
             if(xQueueReceiveFromISR( movementQueue, &movement, &xTaskWokenByReceive) != pdFALSE){
                 if(movement.speed != -1){
                     TIM_PrescalerConfig(TIM2, 10000 / movement.speed, TIM_PSCReloadMode_Update);
-                }else{
-                    TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update);
                 }
 
-                if(movement.x > 0){
-                    GPIO_SetBits(DirPinPort, XDirPin);
-                }else{
+                xLimitState = GPIO_ReadInputDataBit(LimitPinPort, XLimitPin);
+                yLimitState = GPIO_ReadInputDataBit(LimitPinPort, YLimitPin);
+                zLimitState = GPIO_ReadInputDataBit(LimitPinPort, ZLimitPin);
+                if(!xLimitState){
+                    xPos = 0;
+                }
+                if(!yLimitState){
+                    yPos = 0;
+                }
+                if(!zLimitState){
+                    zPos = 0;
+                }
+                //TODO: Shrink This
+                if(movement.x < 0){
+                    if(xPos >= X_STEP_LIMIT){
+                        movement.x = 0;
+                    }
                     GPIO_ResetBits(DirPinPort, XDirPin);
-                }
-
-                if(movement.y < 0){
-                    GPIO_SetBits(DirPinPort, YDirPin);
                 }else{
-                    GPIO_ResetBits(DirPinPort, YDirPin);
+                    if(!xLimitState){
+                        movement.x = 0;
+                    }
+                    GPIO_SetBits(DirPinPort, XDirPin);
                 }
 
-                if(movement.z > 0){
+                if(movement.y > 0){
+                    if(!yLimitState){
+                        movement.y = 0;
+                    }
+                    GPIO_ResetBits(DirPinPort, YDirPin);
+                }else{
+                    if(yPos >= Y_STEP_LIMIT){
+                        movement.y = 0;
+                    }
+                    GPIO_SetBits(DirPinPort, YDirPin);
+                }
+
+                if(movement.z < 0){
+                    if(zPos >= Z_STEP_LIMIT){
+                        movement.z = 0;
+                    }
                     GPIO_SetBits(DirPinPort, ZDirPin);
                 }else{
+                    if(!zLimitState){
+                        movement.z = 0;
+                    }
                     GPIO_ResetBits(DirPinPort, ZDirPin);
                 }
 
-                if(movement.x && movement.y)
-                   GPIO_SetBits(StepPinPort, XStepPin | YStepPin);
-                else if(movement.x)
-                   GPIO_SetBits(StepPinPort, XStepPin);
-                else if(movement.y)
-                   GPIO_SetBits(StepPinPort, YStepPin);
+                if(movement.x && movement.y){
+                    GPIO_SetBits(StepPinPort, XStepPin | YStepPin);
+                    xPos += movement.x;
+                    yPos += movement.y;
+                    TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update);
+                }else if(movement.x){
+                    GPIO_SetBits(StepPinPort, XStepPin);
+                    xPos += movement.x;
+                    TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update);
+                }else if(movement.y){
+                    GPIO_SetBits(StepPinPort, YStepPin);
+                    yPos += movement.y;
+                    TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update);
+                }
 
                 if(movement.z){
                     GPIO_SetBits(StepPinPort, ZStepPin);
+                    zPos += movement.z;
+                    TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update);
                 }
+
+                if(xPos < 0)
+                    xPos = 0;
+                if(yPos < 0)
+                    yPos = 0;
+                if(zPos < 0)
+                    zPos = 0;
             }
         }else{
             GPIO_ResetBits(StepPinPort, XStepPin | YStepPin | ZStepPin);
@@ -200,6 +264,8 @@ void  CNC_controller_init(void){
     timer2State = 0;
 
     stepperState = 1;
+
+
     return;
 }
 
@@ -210,6 +276,11 @@ void CNC_controller_depatch_task(void *pvParameters){
         return;
     }
 
+    //updateFeedrate(800);
+    //moveRelativly(0, 0, Z_STEP_LIMIT);
+    //moveRelativly((-1) * X_STEP_LIMIT, 0, 0);
+    //moveRelativly(0, (-1) * Y_STEP_LIMIT, 0);
+    //updateFeedrate(100);
     while(1){
         xQueueReceive(operationQueue, &operation, portMAX_DELAY);
 

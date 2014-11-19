@@ -171,7 +171,7 @@ static int jogUI_handleInput()
         }else if(new_PointIsInRect(&jogUI_fastSpeedToggleButton.rect, &touchPannelPoint)){
             while(uxQueueMessagesWaiting( operationQueue )); // Clear Movements
             if(settedSpeed == 200){
-                settedSpeed = 600; 
+                settedSpeed = 800; 
                 movementAmount = 100;
             }else{
                 settedSpeed = 200; 

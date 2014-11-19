@@ -54,7 +54,8 @@ void USART1_IRQHandler()
 		char msg = USART_ReceiveData(USART1);
 
 		/* If there is an error when queueing the received byte, freeze! */
-		xQueueSendToBackFromISR(serial_rx_queue, &msg, &xHigherPriorityTaskWoken);
+		if(xQueueSendToBackFromISR(serial_rx_queue, &msg, &xHigherPriorityTaskWoken) == pdFALSE)
+            while(1);
 	}
 	else {
 		/* Only transmit and receive interrupts should be enabled.
@@ -190,7 +191,6 @@ int main()
 
     IOE_Config();
 
-    GPIO_SetBits(GPIOG, GPIO_Pin_13); //Logic Analyser Debug Trigger
     //GPIO_SetBits(GPIOC, GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13); //Logic Analyser Debug Trigger
     //GPIO_ToggleBits(GPIOC, GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13); //Logic Analyser Debug Trigger
 
@@ -208,7 +208,7 @@ int main()
 	vSemaphoreCreateBinary(serial_tx_wait_sem);
 	/* Add for serial input 
 	 * Reference: www.freertos.org/a00116.html */
-	serial_rx_queue = xQueueCreate(1, sizeof(char));
+	serial_rx_queue = xQueueCreate(256, sizeof(char));
 
 	/* Create a task to output text read from romfs. */
 	//xTaskCreate(gcode_command_prompt,
@@ -217,12 +217,11 @@ int main()
 
 	xTaskCreate(CNC_controller_depatch_task,
 	            "CNC",
-	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
+	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 2, NULL);
 
 	xTaskCreate(mainUI,
 	            "UI",
 	            512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, NULL);
-
 #if 0
 	/* Create a task to record system log. */
 	xTaskCreate(system_logger,

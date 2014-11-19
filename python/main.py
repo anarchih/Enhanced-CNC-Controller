@@ -1,5 +1,6 @@
 import serial
-
+import getopt
+import sys
 
 ser = None
 flag = False
@@ -35,8 +36,7 @@ def shell():
             print("M114; - report position and feedrate")
         else:
             ser.write((code.strip() + "\n").encode("ASCII"))
-            ser.read(1)
-
+            ser.readline();
 
 def send():
     fn = input("Please input G-Code file's filename:")
@@ -44,8 +44,21 @@ def send():
     for l in f:
         print(l.strip())
         ser.write((l.strip() + "\n").encode("ASCII"))
-        while(int(ser.read(1).encode('hex'), 16) != 6):
-            pass
+        ser.read(1);
+
+
+
+
+
+optlist, args = getopt.getopt(sys.argv[1:], 'f:p:')
+if optlist:
+    f = open(optlist[0][1])
+    ser = serial.Serial(optlist[1][1], 9600, timeout=None)
+    flag = True
+    for l in f:
+        print(l.strip())
+        ser.write((l.strip() + "\n").encode("ASCII"))
+        ser.read(1);
 
 print("Welcome to CNC430 Contorl Program!")
 print("type in commands to operate; help to list commands")
@@ -75,3 +88,4 @@ while True:
     else:
         print("I can't get you ;(")
         send
+

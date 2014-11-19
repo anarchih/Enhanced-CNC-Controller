@@ -1,4 +1,9 @@
+
 #include "cnc_misc.h"
+
+uint32_t abs_int(uint32_t num){
+    return num > 0 ? num : (-1) * num;
+}
 
 float atof(const char* s){
     float rez = 0, fact = 1;

@@ -4,12 +4,6 @@
 #include "cnc-controller.h"
 #define MAX_F 100.0
 #define MAX_A 1
-#define X_STEP_LENGTH_MM 0.00625
-#define Y_STEP_LENGTH_MM 0.00625
-#define Z_STEP_LENGTH_MM 0.004
-#define X_STEP_LENGTH_INCH 0.00024606299
-#define Y_STEP_LENGTH_INCH 0.00024606299
-#define Z_STEP_LENGTH_INCH 0.00015748031
 
 #define RMS_SPEED_FACTOR 0.00970180395
 
@@ -28,6 +22,15 @@ float offset_z = 0;
 float curr_v = 0;
 
 static void CheckExist(char* gcode,struct Exist *exist){
+    exist->x = 0;
+    exist->y = 0;
+    exist->z = 0;
+    exist->i = 0;
+    exist->j = 0;
+    exist->k = 0;
+    exist->f = 0;
+    exist->s = 0;
+
     for (int i=0; i<strlen(gcode); i++){
         switch (gcode[i]){
             case 'X':
@@ -194,7 +197,7 @@ uint32_t ExcuteGCode(char *gcode){
         strncmp(gcode, "G1", 2) == 0  ){
 
         retriveParameters(gcode, &exist, &v1, NULL, NULL, NULL);
-        line_move(0, v1, &exist);
+        line_move(1, v1, &exist);
     }else if (strncmp(gcode, "G04", 3) == 0){
 
     }else if (strncmp(gcode, "G20", 3) == 0){

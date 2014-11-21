@@ -36,7 +36,47 @@ Using the Software
   ```
    - Must make Control Board Enter Gcode Mode First
    
-   
+Pin Connections
+===============
+
+PA9 -> USART
+PA10 -> USART
+
+PB4 -> PWM Spindle Ctl
+PB7
+
+PB12
+PB13
+PB14
+PB15
+
+PC1
+PC3 -> X Motor Enable
+PC4 -> Y Motor Enable
+PC5 -> Z Motor Enable
+PC8 -> Y Motor Direction
+PC11 -> X Motor Direction
+PC12 
+PC13 -> Z Motor Direction
+
+PD2
+PD4
+PD5
+PD7
+
+PE2 -> X Motor Step
+PE3 -> Y Motor Step
+PE4 -> Z Motor Step
+PE5
+PE6
+
+PF6
+
+PG2
+PG3
+PG9 -> X Axis - Limit
+PG13 -> Y Axis - Limit
+PG14 -> Z Axis - Limit
 
 
     

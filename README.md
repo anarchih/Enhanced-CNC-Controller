@@ -8,6 +8,22 @@ We use the following Hardware:
  - TI DRV8825 for X Y Z Stepper Driving
  - A PWM based MOSFET Spindle Control
 
+Current Supported G-Codes
+=================
+ - G00
+ - G01
+ - G20
+ - G21
+ - G90
+ - G01
+ - G92 not fully functional
+ - M02
+ - M03
+ - M05
+ - M17
+ - M18
+ - S
+
 Dependience Requirement
 =======================
  - Ubuntu or MAC OSX
@@ -79,6 +95,11 @@ PG13 -> Y Axis - Limit
 PG14 -> Z Axis - Limit
 ```
 
+TODO
+====
+ - Add G02 G03 Code
+ - Add Z surface detection
+ - Add SD Card Support
     
    
 

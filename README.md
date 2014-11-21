@@ -16,10 +16,10 @@ Dependience Requirement
 
 Buring the Software to Board
 =============
-::
+```bash
    make
    make openocdflash or make flash (Depends on what you are using)
-   
+```
 Using the Software
 ==================
  - We Use the Touch Screen of STM32F429 DISCO to Control our machine
@@ -31,8 +31,9 @@ Using the Software
   
  - Python G-Code Sender
    - Usage
-  :: 
-    python3 main.py -f NC_FILE -p /dev/tty*
+  ```bash
+  python3 main.py -f NC_FILE -p /dev/tty*
+  ```
    - Must make Control Board Enter Gcode Mode First
    
    

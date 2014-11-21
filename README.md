@@ -38,7 +38,7 @@ Using the Software
    
 Pin Connections
 ===============
-
+```
 PA9 -> USART
 PA10 -> USART
 
@@ -77,7 +77,7 @@ PG3
 PG9 -> X Axis - Limit
 PG13 -> Y Axis - Limit
 PG14 -> Z Axis - Limit
-
+```
 
     
    

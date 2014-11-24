@@ -50,7 +50,7 @@ struct new_Button spindleUI_speedUpButton;
 struct new_Button spindleUI_speedDownButton;
 struct new_Button spindleUI_haltButton;
 
-int32_t spindleSpeed = 1;
+int32_t spindleSpeed = 0;
 
 static void init(){
     setupButton(mainUI_jogModeButton, 25, 25, 50, 50, "JOG");
@@ -61,11 +61,11 @@ static void init(){
     setupButton(jogUI_xFYRButton, 165, 25, 50, 50, "X+Y-");
     setupButton(jogUI_xRYFButton, 25, 175, 50, 50, "X-Y+");
     setupButton(jobUI_xRYRButton, 165, 175, 50, 50, "X-Y-");
-    setupButton(jobUI_xForwardButton, 95, 25, 50, 50, "X+");
     setupButton(jogUI_fastSpeedToggleButton, 95, 100, 50, 50, "F / S");
-    setupButton(jogUI_xReverseButton, 95, 175, 50, 50, "X-");
-    setupButton(jogUI_yForwardButton, 25, 100, 50, 50, "Y+");
-    setupButton(jobUI_yReverseButton, 165, 100, 50, 50, "Y-");
+    setupButton(jobUI_xForwardButton, 165, 100, 50, 50, "X+");
+    setupButton(jogUI_xReverseButton, 25, 100, 50, 50, "X-");
+    setupButton(jogUI_yForwardButton, 95, 25, 50, 50, "Y+");
+    setupButton(jobUI_yReverseButton, 95, 175, 50, 50, "Y-");
     setupButton(jobUI_zForwardButton, 25, 245, 50, 50, "Z+");
     setupButton(jogUI_zReverseButton, 165, 245, 50, 50, "Z-");
 

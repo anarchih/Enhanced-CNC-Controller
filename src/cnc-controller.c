@@ -28,6 +28,9 @@ uint32_t SpindleSpeed = 0;
 uint32_t timer2State;
 
 uint32_t stepperState;
+int32_t xInvertCoefficient = 1;
+int32_t yInvertCoefficient = 1;
+int32_t zInvertCoefficient = 1;
 int32_t xPos = 0;
 int32_t yPos = 0;
 int32_t zPos = 0;
@@ -88,9 +91,10 @@ void TIM2_IRQHandler(void){
                     TIM_PrescalerConfig(TIM2, 10000 / movement.speed, TIM_PSCReloadMode_Update);
                 }
 
-                xLimitState = GPIO_ReadInputDataBit(LimitPinPort, XLimitPin);
-                yLimitState = GPIO_ReadInputDataBit(LimitPinPort, YLimitPin);
-                zLimitState = GPIO_ReadInputDataBit(LimitPinPort, ZLimitPin);
+                xLimitState = GPIO_ReadInputDataBit(Limit1PinPort, XLimit1Pin) & GPIO_ReadInputDataBit(Limit2PinPort, XLimit2Pin);
+                yLimitState = GPIO_ReadInputDataBit(Limit1PinPort, YLimit1Pin) & GPIO_ReadInputDataBit(Limit2PinPort, YLimit2Pin);
+                zLimitState = GPIO_ReadInputDataBit(Limit1PinPort, ZLimit1Pin) & GPIO_ReadInputDataBit(Limit2PinPort, ZLimit2Pin);
+
                 if(!xLimitState){
                     xPos = 0;
                 }
@@ -100,8 +104,8 @@ void TIM2_IRQHandler(void){
                 if(!zLimitState){
                     zPos = 0;
                 }
-                //TODO: Shrink This
-                if(movement.x < 0){
+                //TODO: Shrink This to fit 2 switched
+                if(xInvertCoefficient * movement.x < 0){
                     if(!xLimitState){
                         movement.x = 0;
                     }
@@ -113,7 +117,7 @@ void TIM2_IRQHandler(void){
                     GPIO_SetBits(DirPinPort, XDirPin);
                 }
 
-                if(movement.y < 0){
+                if(yInvertCoefficient * movement.y < 0){
                     if(!yLimitState){
                         movement.y = 0;
                     }
@@ -125,7 +129,7 @@ void TIM2_IRQHandler(void){
                     GPIO_ResetBits(DirPinPort, YDirPin);
                 }
 
-                if(movement.z < 0){
+                if(zInvertCoefficient * movement.z < 0){
                     if(zPos >= Z_STEP_LIMIT){
                         movement.z = 0;
                     }
@@ -253,15 +257,15 @@ static void resetHome(void){
         while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
 
         flag = 0;
-        if(GPIO_ReadInputDataBit(LimitPinPort, XLimitPin)){
+        if(GPIO_ReadInputDataBit(Limit1PinPort, XLimit1Pin) & GPIO_ReadInputDataBit(Limit2PinPort, XLimit2Pin)){
             moveRelativly(-100, 0, 0);
             flag = 1;
         }
-        if(GPIO_ReadInputDataBit(LimitPinPort, YLimitPin)){
+        if(GPIO_ReadInputDataBit(Limit1PinPort, YLimit1Pin) & GPIO_ReadInputDataBit(Limit2PinPort, YLimit2Pin)){
             moveRelativly(0, -100, 0);
             flag = 1;
         }
-        if(GPIO_ReadInputDataBit(LimitPinPort, ZLimitPin)){
+        if(GPIO_ReadInputDataBit(Limit1PinPort, ZLimit1Pin) & GPIO_ReadInputDataBit(Limit2PinPort, ZLimit2Pin)){
             moveRelativly(0, 0, 100);
             flag = 1;
         }
@@ -287,7 +291,13 @@ void  CNC_controller_init(void){
     timer2State = 0;
 
     stepperState = 1;
-
+    
+    if(XInvert)
+        xInvertCoefficient = -1;
+    if(YInvert)
+        yInvertCoefficient = -1;
+    if(ZInvert)
+        zInvertCoefficient = -1;
 
     return;
 }

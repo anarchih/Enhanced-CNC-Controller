@@ -246,18 +246,25 @@ uint8_t moveRelativly(int32_t x, int32_t y, int32_t z){
 }
 
 static void resetHome(void){
+    uint32_t flag = 1;
+
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
-    while(GPIO_ReadInputDataBit(LimitPinPort, XLimitPin)){
+    while(flag){
         while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
-        moveRelativly(-20, 0, 0);
-    }
-    while(GPIO_ReadInputDataBit(LimitPinPort, YLimitPin)){
-        while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
-        moveRelativly(0, -20, 0);
-    }
-    while(GPIO_ReadInputDataBit(LimitPinPort, ZLimitPin)){
-        while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
-        moveRelativly(0, 0, 20);
+
+        flag = 0;
+        if(GPIO_ReadInputDataBit(LimitPinPort, XLimitPin)){
+            moveRelativly(-100, 0, 0);
+            flag = 1;
+        }
+        if(GPIO_ReadInputDataBit(LimitPinPort, YLimitPin)){
+            moveRelativly(0, -100, 0);
+            flag = 1;
+        }
+        if(GPIO_ReadInputDataBit(LimitPinPort, ZLimitPin)){
+            moveRelativly(0, 0, 100);
+            flag = 1;
+        }
     }
 }
 

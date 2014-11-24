@@ -297,6 +297,10 @@ static void gcodeUI_gcodeJob()
 {
 	char buf[128];
 
+    CNC_SetFeedrate(800);
+    CNC_Home();
+    CNC_SetFeedrate(200);
+
     while (1) {
         fio_printf(1, "\rWelcome to GCode Shell\r\n");
         fio_printf(1, ">");

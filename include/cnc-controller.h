@@ -39,6 +39,7 @@ enum CNC_Opcodes{
     enableStepper,
     disableStepper,
     setSpindleSpeed,
+    homeStepper,
 };
 
 struct CNC_Operation_t {
@@ -64,6 +65,7 @@ void CNC_SetFeedrate(uint32_t feedrate);
 void CNC_EnableStepper();
 void CNC_DisableStepper();
 void CNC_SetSpindleSpeed();
+void CNC_Home();
 
 
 #endif

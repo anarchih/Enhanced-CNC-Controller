@@ -102,27 +102,27 @@ void TIM2_IRQHandler(void){
                 }
                 //TODO: Shrink This
                 if(movement.x < 0){
-                    if(xPos >= X_STEP_LIMIT){
+                    if(!xLimitState){
                         movement.x = 0;
                     }
                     GPIO_ResetBits(DirPinPort, XDirPin);
                 }else{
-                    if(!xLimitState){
+                    if(xPos >= X_STEP_LIMIT){
                         movement.x = 0;
                     }
                     GPIO_SetBits(DirPinPort, XDirPin);
                 }
 
-                if(movement.y > 0){
+                if(movement.y < 0){
                     if(!yLimitState){
                         movement.y = 0;
                     }
-                    GPIO_ResetBits(DirPinPort, YDirPin);
+                    GPIO_SetBits(DirPinPort, YDirPin);
                 }else{
                     if(yPos >= Y_STEP_LIMIT){
                         movement.y = 0;
                     }
-                    GPIO_SetBits(DirPinPort, YDirPin);
+                    GPIO_ResetBits(DirPinPort, YDirPin);
                 }
 
                 if(movement.z < 0){
@@ -245,6 +245,22 @@ uint8_t moveRelativly(int32_t x, int32_t y, int32_t z){
 	return 0;
 }
 
+static void resetHome(void){
+    while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+    while(GPIO_ReadInputDataBit(LimitPinPort, XLimitPin)){
+        while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+        moveRelativly(-20, 0, 0);
+    }
+    while(GPIO_ReadInputDataBit(LimitPinPort, YLimitPin)){
+        while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+        moveRelativly(0, -20, 0);
+    }
+    while(GPIO_ReadInputDataBit(LimitPinPort, ZLimitPin)){
+        while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+        moveRelativly(0, 0, 20);
+    }
+}
+
 void  CNC_controller_init(void){
     operationQueue = xQueueCreate(32, sizeof(struct CNC_Operation_t));
     movementQueue = xQueueCreate(256, sizeof(struct CNC_Movement_t));
@@ -287,6 +303,9 @@ void CNC_controller_depatch_task(void *pvParameters){
         switch(operation.opcodes){
             case moveStepper:
                 moveRelativly(operation.parameter1, operation.parameter2, operation.parameter3);
+                break;
+            case homeStepper:
+                resetHome();
                 break;
             case setFeedrate:
                 updateFeedrate(operation.parameter1);
@@ -352,6 +371,15 @@ void CNC_SetSpindleSpeed(uint32_t speed){
         return;
     operation.opcodes = setSpindleSpeed;
     operation.parameter1 = speed; 
+    xQueueSend(operationQueue, &operation, portMAX_DELAY);
+    return;
+}
+
+void CNC_Home(void){
+    struct CNC_Operation_t operation;
+    if(operationQueue == 0)
+        return;
+    operation.opcodes = homeStepper;
     xQueueSend(operationQueue, &operation, portMAX_DELAY);
     return;
 }

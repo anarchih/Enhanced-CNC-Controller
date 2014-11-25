@@ -75,7 +75,7 @@ void GPIOC_Configuration(void)
 void GPIOG_Configuration(void)
 {
     GPIO_InitTypeDef GPIO_InitStructureG;
-    GPIO_InitStructureG.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_13 | GPIO_Pin_14; 
+    GPIO_InitStructureG.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_9 | GPIO_Pin_13 | GPIO_Pin_14; 
     GPIO_InitStructureG.GPIO_Mode = GPIO_Mode_IN;
     GPIO_InitStructureG.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructureG.GPIO_PuPd = GPIO_PuPd_UP;

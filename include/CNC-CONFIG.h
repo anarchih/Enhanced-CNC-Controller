@@ -41,4 +41,8 @@
 #define YLimit2Pin GPIO_Pin_9
 #define ZLimit2Pin GPIO_Pin_14
 
+#define ZCalPinPort GPIOG
+#define ZCalPin GPIO_Pin_3
+
+
 #endif //__CNCCONFIG__

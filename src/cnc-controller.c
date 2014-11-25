@@ -35,6 +35,11 @@ int32_t xPos = 0;
 int32_t yPos = 0;
 int32_t zPos = 0;
 
+float xDelta = 0;
+float yDelta = 0;
+float xErrAcc = 0;
+float yErrAcc = 0;
+
 static void updateSpindleSpeed(uint32_t speed){
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
     
@@ -94,7 +99,7 @@ void TIM2_IRQHandler(void){
                 if(!zLimitState){
                     zPos = 0;
                 }
-                //TODO: Shrink This to fit 2 switched
+                //TODO: Shrink This to fit 2 switch
                 if(xInvertCoefficient * movement.x < 0){
                     if(!xLimitState){
                         movement.x = 0;
@@ -241,25 +246,138 @@ uint8_t moveRelativly(int32_t x, int32_t y, int32_t z){
 
 static void resetHome(void){
     uint32_t flag = 1;
+    uint32_t xxflag, yyflag = 0;
 
+    updateFeedrate(800);
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
     while(flag){
         while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
 
         flag = 0;
-        if(GPIO_ReadInputDataBit(Limit1PinPort, XLimit1Pin) & GPIO_ReadInputDataBit(Limit2PinPort, XLimit2Pin)){
-            moveRelativly(-100, 0, 0);
-            flag = 1;
-        }
-        if(GPIO_ReadInputDataBit(Limit1PinPort, YLimit1Pin) & GPIO_ReadInputDataBit(Limit2PinPort, YLimit2Pin)){
-            moveRelativly(0, -100, 0);
-            flag = 1;
-        }
         if(GPIO_ReadInputDataBit(Limit1PinPort, ZLimit1Pin) & GPIO_ReadInputDataBit(Limit2PinPort, ZLimit2Pin)){
             moveRelativly(0, 0, 100);
             flag = 1;
         }
     }
+
+    flag = 1;
+    xxflag = yyflag = 0;
+    while(flag){
+        while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+
+        flag = 0;
+        if(GPIO_ReadInputDataBit(Limit1PinPort, XLimit1Pin) & GPIO_ReadInputDataBit(Limit2PinPort, XLimit2Pin)){
+            xxflag = 1;
+            flag = 1;
+        }
+        if(GPIO_ReadInputDataBit(Limit1PinPort, YLimit1Pin) & GPIO_ReadInputDataBit(Limit2PinPort, YLimit2Pin)){
+            yyflag = 1;
+            flag = 1;
+        }
+        
+        moveRelativly(-100 * xxflag, -100 * yyflag, 0);
+    }
+    updateFeedrate(200);
+    return;
+}
+
+static void calibrateZAxis(void){
+    int32_t Original = 0;
+    int32_t temp = 0;
+
+    while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+    updateFeedrate(800);
+    moveRelativly(20 / X_STEP_LENGTH_MM, 20 / Y_STEP_LENGTH_MM, 0);
+    
+    updateFeedrate(200);
+    /* Probe Origin*/
+    while(GPIO_ReadInputDataBit(ZCalPinPort, ZCalPin)){
+        while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+        moveRelativly(0, 0, -1);
+        Original++;
+    }
+    updateFeedrate(800);
+    /*Reset Z Axis*/
+    moveRelativly(0, 0, Original);
+    
+    /* Shift Right by 3cm*/
+    moveRelativly(30 / X_STEP_LENGTH_MM, 0, 0);
+
+    updateFeedrate(200);
+    /* Probe x = 3cm*/
+    while(GPIO_ReadInputDataBit(ZCalPinPort, ZCalPin)){
+        while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+        moveRelativly(0, 0, -1);
+        temp++;
+    }
+    updateFeedrate(800);
+    /*Reset Z Axis*/
+    moveRelativly(0, 0, temp);
+
+    xDelta = Original - temp;
+    temp = 0;
+
+    updateFeedrate(800);
+    /* Shift Right by 3cm*/
+    moveRelativly(30 / X_STEP_LENGTH_MM, 0, 0);
+
+    updateFeedrate(200);
+    /* Probe x = 6cm*/
+    while(GPIO_ReadInputDataBit(ZCalPinPort, ZCalPin)){
+        while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+        moveRelativly(0, 0, -1);
+        temp++;
+    }
+    updateFeedrate(800);
+    /*Reset Z Axis*/
+    moveRelativly(0, 0, temp);
+
+    xDelta = ((Original - temp) + xDelta) / 2;
+    temp = 0;
+    
+    updateFeedrate(800);
+    /* Reset X*/
+    moveRelativly(-60 / X_STEP_LENGTH_MM, 0, 0);
+    
+    /* Start to Probe Y*/
+
+    /* Shift Up by 3cm*/
+    moveRelativly(0, 30 / Y_STEP_LENGTH_MM, 0);
+
+    updateFeedrate(200);
+    /* Probe y = 3cm*/
+    while(GPIO_ReadInputDataBit(ZCalPinPort, ZCalPin)){
+        while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+        moveRelativly(0, 0, -1);
+        temp++;
+    }
+    updateFeedrate(800);
+    /*Reset Z Axis*/
+    moveRelativly(0, 0, temp);
+
+    yDelta = Original - temp;
+    temp = 0;
+
+    /* Shift Up by 3cm*/
+    moveRelativly(0, 30 / Y_STEP_LENGTH_MM, 0);
+
+    updateFeedrate(200);
+    /* Probe y = 6cm*/
+    while(GPIO_ReadInputDataBit(ZCalPinPort, ZCalPin)){
+        while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
+        moveRelativly(0, 0, -1);
+        temp++;
+    }
+    updateFeedrate(800);
+    /*Reset Z Axis*/
+    moveRelativly(0, 0, temp);
+
+    yDelta = ((Original - temp) + yDelta) / 2;
+
+    xDelta /= (30 / X_STEP_LENGTH_MM);
+    yDelta /= (30 / Y_STEP_LENGTH_MM);
+
+    return;
 }
 
 void  CNC_controller_init(void){
@@ -289,6 +407,11 @@ void  CNC_controller_init(void){
     if(ZInvert)
         zInvertCoefficient = -1;
 
+    //updateFeedrate(800);
+    //resetHome();
+    //updateFeedrate(200);
+    //calibrateZAxis();
+
     return;
 }
 
@@ -312,7 +435,9 @@ void CNC_controller_depatch_task(void *pvParameters){
                 moveRelativly(operation.parameter1, operation.parameter2, operation.parameter3);
                 break;
             case homeStepper:
+                updateFeedrate(800);
                 resetHome();
+                updateFeedrate(200);
                 break;
             case setFeedrate:
                 updateFeedrate(operation.parameter1);
@@ -325,6 +450,10 @@ void CNC_controller_depatch_task(void *pvParameters){
                 break;
             case setSpindleSpeed:
                 updateSpindleSpeed(operation.parameter1);
+                break;
+            case calZAxis:
+                resetHome();
+                calibrateZAxis();
                 break;
         } 
     }
@@ -387,6 +516,15 @@ void CNC_Home(void){
     if(operationQueue == 0)
         return;
     operation.opcodes = homeStepper;
+    xQueueSend(operationQueue, &operation, portMAX_DELAY);
+    return;
+}
+
+void CNC_CalZ(void){
+    struct CNC_Operation_t operation;
+    if(operationQueue == 0)
+        return;
+    operation.opcodes = calZAxis;
     xQueueSend(operationQueue, &operation, portMAX_DELAY);
     return;
 }

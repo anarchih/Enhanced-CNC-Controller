@@ -13,6 +13,7 @@ enum CNC_Opcodes{
     disableStepper,
     setSpindleSpeed,
     homeStepper,
+    calZAxis
 };
 
 struct CNC_Operation_t {
@@ -39,6 +40,7 @@ void CNC_EnableStepper();
 void CNC_DisableStepper();
 void CNC_SetSpindleSpeed();
 void CNC_Home();
+void CNC_CalZ();
 
 
 #endif

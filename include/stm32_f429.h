@@ -26,8 +26,10 @@ void GPIOG_Configuration();
 void GPIOE_Configuration();
 
 void TIMER2_Configuration(void);
-void PWM_Init(void);
 void TIMER3_Configuration(void);
+void TIMER4_Configuration(void);
+void TIMER5_Configuration(void);
+void PWM_Init(void);
 
 void USART1_Configuration();
 

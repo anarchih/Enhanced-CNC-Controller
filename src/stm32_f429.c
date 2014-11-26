@@ -21,6 +21,7 @@ void RCC_Configuration(void)
       /* Timers clock enable */
       RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
       RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+      RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
 }
 
 
@@ -154,7 +155,6 @@ void TIMER2_Configuration(void)
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
     
-    //TIMER 2 is on APB1 -> 84MHz
     TIM_TimeBaseStructure.TIM_Period = 2400 - 1;
     TIM_TimeBaseStructure.TIM_Prescaler = 10000 - 1;
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
@@ -169,7 +169,48 @@ void TIMER2_Configuration(void)
     NVIC_Init(&NVIC_InitStructure);
 
     TIM_Cmd(TIM2, ENABLE);
-    TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+}
+
+void TIMER4_Configuration(void)
+{
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+    
+    TIM_TimeBaseStructure.TIM_Period = 2400 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 10000 - 1;
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
+    TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);
+
+    NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+
+    TIM_Cmd(TIM4, ENABLE);
+}
+
+void TIMER5_Configuration(void)
+{
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+    
+    TIM_TimeBaseStructure.TIM_Period = 2400 - 1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 10000 - 1;
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
+    TIM_TimeBaseInit(TIM5, &TIM_TimeBaseStructure);
+
+    NVIC_InitStructure.NVIC_IRQChannel = TIM5_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+
+    TIM_Cmd(TIM5, ENABLE);
 }
 
 void PWM_Init(void) {

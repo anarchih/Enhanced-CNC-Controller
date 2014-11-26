@@ -181,21 +181,18 @@ int main()
     
     LCD_Init();
     LTDC_Cmd(ENABLE);
-
     LCD_LayerInit();
     LCD_SetColors(LCD_COLOR_RED, LCD_COLOR_BLACK);
     LCD_SetLayer(LCD_BACKGROUND_LAYER);
     LCD_SetTransparency(0xff);
     LCD_SetLayer(LCD_FOREGROUND_LAYER);
     LCD_SetTransparency(0x00);
-
     IOE_Config();
-
-    //GPIO_SetBits(GPIOC, GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13); //Logic Analyser Debug Trigger
-    //GPIO_ToggleBits(GPIOC, GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13); //Logic Analyser Debug Trigger
 
     TIMER2_Configuration();
     TIMER3_Configuration();
+    TIMER4_Configuration();
+    TIMER5_Configuration();
     PWM_Init();
     CNC_controller_init();
 	

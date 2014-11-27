@@ -124,7 +124,14 @@ void line_move(uint32_t gnum, struct Vector v, struct Exist *exist){
 }
 
 static void M03(uint32_t speed, struct Exist *exist){
-    CNC_SetSpindleSpeed(speed);
+    if(!exist->s)
+        return;
+
+    if(speed > MAX_SPINDLE_REV_MIN)
+        speed = MAX_SPINDLE_REV_MIN;
+
+    CNC_SetSpindleSpeed(100 * ((float)speed / MAX_SPINDLE_REV_MIN));
+    return;
 }
 
 static void G92(struct Vector v, struct Exist *exist){

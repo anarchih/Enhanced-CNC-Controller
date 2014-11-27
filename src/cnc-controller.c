@@ -257,9 +257,9 @@ uint8_t moveRelativly(int32_t x, int32_t y, int32_t z){
     yStepsBuffer = y;
     zStepsBuffer = z;
     
-    TIM_PrescalerConfig(TIM2, 10000 / (stepperSpeed * (x / (x + y + z))), TIM_PSCReloadMode_Immediate);
-    TIM_PrescalerConfig(TIM5, 10000 / (stepperSpeed * (y / (x + y + z))), TIM_PSCReloadMode_Immediate);
-    TIM_PrescalerConfig(TIM4, 10000 / (stepperSpeed * (z / (x + y + z))), TIM_PSCReloadMode_Immediate);
+    TIM_PrescalerConfig(TIM2, 10000 / (stepperSpeed * ((float)x / (x + y + z))), TIM_PSCReloadMode_Immediate);
+    TIM_PrescalerConfig(TIM5, 10000 / (stepperSpeed * ((float)y / (x + y + z))), TIM_PSCReloadMode_Immediate);
+    TIM_PrescalerConfig(TIM4, 10000 / (stepperSpeed * ((float)z / (x + y + z))), TIM_PSCReloadMode_Immediate);
     
     TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
     TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);

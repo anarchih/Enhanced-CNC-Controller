@@ -40,6 +40,8 @@ float yDelta = 0;
 float xErrAcc = 0;
 float yErrAcc = 0;
 
+uint32_t zOffset = 0;
+
 static void updateSpindleSpeed(uint32_t speed){
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
     
@@ -411,9 +413,7 @@ static void calibrateZAxis(void){
 
     yDelta = (((Original - y1) + (y1 - y2)) / 2) / (30 / Y_STEP_LENGTH_MM);
 
-    xDelta /= (30 / X_STEP_LENGTH_MM);
-    yDelta /= (30 / Y_STEP_LENGTH_MM);
-
+    zOffset = Original;
     return;
 }
 
@@ -471,11 +471,6 @@ void CNC_controller_depatch_task(void *pvParameters){
             case moveStepper:
                 moveRelativly(operation.parameter1, operation.parameter2, operation.parameter3);
                 break;
-            case homeStepper:
-                updateFeedrate(800);
-                resetHome();
-                updateFeedrate(200);
-                break;
             case setFeedrate:
                 updateFeedrate(operation.parameter1);
                 break;
@@ -491,6 +486,14 @@ void CNC_controller_depatch_task(void *pvParameters){
             case calZAxis:
                 resetHome();
                 calibrateZAxis();
+                break;
+            case homeStepper:
+                resetHome();
+                break;
+            case homeStepperSurface:
+                resetHome();
+                moveRelativly(15 / X_STEP_LENGTH_MM, 15 / X_STEP_LENGTH_MM, 0);
+                moveRelativly((-1) * zOffset);
                 break;
         } 
     }

@@ -13,6 +13,7 @@ enum CNC_Opcodes{
     disableStepper,
     setSpindleSpeed,
     homeStepper,
+    homeStepperSurface,
     calZAxis
 };
 

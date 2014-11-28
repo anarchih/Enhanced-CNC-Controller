@@ -1,4 +1,6 @@
 #include <string.h>
+#include "fio.h"
+#include "clib.h"
 #include "cnc_misc.h"
 #include "gcodeinter.h"
 #include "cnc-controller.h"
@@ -20,6 +22,25 @@ float offset_y = 0;
 float offset_z = 0;
 
 float curr_v = 0;
+
+void gcodeJob()
+{
+	char buf[128];
+
+    CNC_Home();
+    CNC_CalZ();
+    CNC_HomeSurface();
+    
+    fio_printf(1, "\rWelcome to GCode Shell\r\n");
+    while (1) {
+        fio_printf(1, ">");
+
+        fio_read(0, buf, 127);
+        ExcuteGCode(buf);
+
+        fio_printf(1, "\x06");
+    }
+}
 
 static void CheckExist(char* gcode,struct Exist *exist){
     exist->x = 0;
@@ -120,7 +141,6 @@ void line_move(uint32_t gnum, struct Vector v, struct Exist *exist){
         }
     }
     CNC_Move((int32_t)(sv.x/X_STEP_LENGTH), (int32_t)(sv.y/Y_STEP_LENGTH), (int32_t)(sv.z/Z_STEP_LENGTH));
-    //TODO: Record Error 
 }
 
 static void M03(uint32_t speed, struct Exist *exist){
@@ -128,6 +148,7 @@ static void M03(uint32_t speed, struct Exist *exist){
 }
 
 static void G92(struct Vector v, struct Exist *exist){
+    //TODO: Check isn't correct
     if(!exist->x)v.x = curr_x;
     if(!exist->y)v.y = curr_y;
     if(!exist->z)v.z = curr_z;

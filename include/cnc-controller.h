@@ -41,6 +41,7 @@ void CNC_EnableStepper();
 void CNC_DisableStepper();
 void CNC_SetSpindleSpeed();
 void CNC_Home();
+void CNC_HomeSurface();
 void CNC_CalZ();
 
 

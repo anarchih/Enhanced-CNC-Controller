@@ -293,24 +293,6 @@ static void gcodeUI_render()
     new_Present();
 }
 
-static void gcodeUI_gcodeJob()
-{
-	char buf[128];
-
-    CNC_Home();
-    CNC_CalZ();
-    
-    while (1) {
-        fio_printf(1, "\rWelcome to GCode Shell\r\n");
-        fio_printf(1, ">");
-
-        fio_read(0, buf, 127);
-        ExcuteGCode(buf);
-
-        fio_printf(1, "\x06");
-    }
-}
-
 static int gcodeUI_handleInput()
 {
     touchPannelInfo = IOE_TP_GetState(); 
@@ -371,7 +353,7 @@ void gcodeUI(void){
     uint8_t back = 0;
     TaskHandle_t xHandle = NULL;
 
-    xTaskCreate(gcodeUI_gcodeJob,
+    xTaskCreate(gcodeJob,
             "GCODE_JOB",
             512 /* stack size */, NULL, tskIDLE_PRIORITY + 1, &xHandle);
 

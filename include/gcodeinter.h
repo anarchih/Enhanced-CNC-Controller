@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+void gcodeJob();
 uint32_t ExcuteGCode(char *gcode);
 
 struct Exist{ 

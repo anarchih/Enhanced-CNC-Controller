@@ -289,7 +289,8 @@ uint32_t ExcuteGCode(char *gcode){
     }else if (strncmp(gcode, "G92", 3) == 0){
         retriveParameters(gcode, &exist, &v1, NULL, NULL, NULL);
         G92(v1, &exist);
-    }else if (strncmp(gcode, "M02", 3) == 0){
+    }else if ((strncmp(gcode, "M02", 3) == 0) ||
+              (strncmp(gcode, "M30", 3) == 0)){
         return 1;
     }else if (strncmp(gcode, "M03", 3) == 0){
         retriveParameters(gcode, &exist, NULL, NULL, NULL, &s);

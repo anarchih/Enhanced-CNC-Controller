@@ -147,15 +147,57 @@ static void M03(uint32_t speed, struct Exist *exist){
     CNC_SetSpindleSpeed(speed);
 }
 
-static void G92(struct Vector v, struct Exist *exist){
+static void G10(struct Vector v, struct Exist *exist){
     //TODO: Check isn't correct
-    if(!exist->x)v.x = curr_x;
-    if(!exist->y)v.y = curr_y;
-    if(!exist->z)v.z = curr_z;
-    
-    offset_x = v.x;
-    offset_y = v.y;
-    offset_z = v.z;
+    if(exist->x){
+        offset_x = v.x;
+    }
+    if(exist->y){
+        offset_y = v.y;
+    }
+    if(exist->z){
+        offset_z = v.z;
+    }
+    return;
+}
+
+static void G11(void){
+    offset_x = 0;
+    offset_y = 0;
+    offset_z = 0;
+    return;
+}
+
+static void G28(struct Vector v, struct Exist *exist){
+    uint32_t tmp = abs_mode;
+    abs_mode = 1;
+    retriveParameters(gcode, &exist, &v1, NULL, NULL, NULL);
+    line_move(0, v, &exist);
+    CNC_HomeSurface();
+    abs_mode = tmp;
+    return;
+}
+
+static void G29(struct Vector v, struct Exist *exist){
+    uint32_t tmp = abs_mode;
+    abs_mode = 1;
+    retriveParameters(gcode, &exist, &v1, NULL, NULL, NULL);
+    CNC_HomeSurface();
+    line_move(0, v, &exist);
+    abs_mode = tmp;
+    return;
+}
+
+static void G92(struct Vector v, struct Exist *exist){
+    if(exist->x){
+        offset_x = curr_x - v.x;
+    }
+    if(exist->y){
+        offset_y = curr_y - v.y;
+    }
+    if(exist->z){
+        offset_z = curr_z - v.z;
+    }
     return;
 }
 
@@ -221,6 +263,11 @@ uint32_t ExcuteGCode(char *gcode){
         line_move(1, v1, &exist);
     }else if (strncmp(gcode, "G04", 3) == 0){
 
+    }else if (strncmp(gcode, "G10", 3) == 0){
+        retriveParameters(gcode, &exist, &v1, NULL, NULL, NULL);
+        G10(v1, &exist);
+    }else if (strncmp(gcode, "G11", 3) == 0){
+        G11();
     }else if (strncmp(gcode, "G20", 3) == 0){
         X_STEP_LENGTH = X_STEP_LENGTH_INCH;
         Y_STEP_LENGTH = Y_STEP_LENGTH_INCH;
@@ -229,6 +276,12 @@ uint32_t ExcuteGCode(char *gcode){
         X_STEP_LENGTH = X_STEP_LENGTH_MM;
         Y_STEP_LENGTH = Y_STEP_LENGTH_MM;
         Z_STEP_LENGTH = Z_STEP_LENGTH_MM;
+    }else if (strncmp(gcode, "G28", 3) == 0){
+        retriveParameters(gcode, &exist, &v1, NULL, NULL, NULL);
+        G28(v1, &exist);
+    }else if (strncmp(gcode, "G29", 3) == 0){
+        retriveParameters(gcode, &exist, &v1, NULL, NULL, NULL);
+        G29(v1, &exist);
     }else if (strncmp(gcode, "G90", 3) == 0){
         abs_mode = 1;
     }else if (strncmp(gcode, "G91", 3) == 0){

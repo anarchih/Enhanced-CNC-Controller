@@ -493,7 +493,7 @@ void CNC_controller_depatch_task(void *pvParameters){
             case homeStepperSurface:
                 resetHome();
                 moveRelativly(15 / X_STEP_LENGTH_MM, 15 / X_STEP_LENGTH_MM, 0);
-                moveRelativly((-1) * zOffset);
+                moveRelativly(0, 0, (-1) * zOffset);
                 break;
         } 
     }
@@ -569,6 +569,15 @@ void CNC_Home(void){
     if(operationQueue == 0)
         return;
     operation.opcodes = homeStepper;
+    xQueueSend(operationQueue, &operation, portMAX_DELAY);
+    return;
+}
+
+void CNC_HomeSurface(void){
+    struct CNC_Operation_t operation;
+    if(operationQueue == 0)
+        return;
+    operation.opcodes = homeStepperSurface;
     xQueueSend(operationQueue, &operation, portMAX_DELAY);
     return;
 }

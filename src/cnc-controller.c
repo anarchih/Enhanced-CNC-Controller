@@ -35,7 +35,7 @@ int32_t xPos = 0;
 int32_t yPos = 0;
 int32_t zPos = 0;
 
-float xDelta = 0;
+float xDelta = 1;
 float yDelta = 0;
 float xErrAcc = 0;
 float yErrAcc = 0;
@@ -323,7 +323,7 @@ static void resetHome(void){
 
 static void calibrateZAxis(void){
     int32_t Original = 0;
-    int32_t temp = 0;
+    int32_t x1, x2, y1, y2;
 
     while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
     updateFeedrate(800);
@@ -343,37 +343,35 @@ static void calibrateZAxis(void){
     /* Shift Right by 3cm*/
     moveRelativly(30 / X_STEP_LENGTH_MM, 0, 0);
 
+    x1 = 0;
     updateFeedrate(200);
     /* Probe x = 3cm*/
     while(GPIO_ReadInputDataBit(ZCalPinPort, ZCalPin)){
         while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
         moveRelativly(0, 0, -1);
-        temp++;
+        x1++;
     }
     updateFeedrate(800);
     /*Reset Z Axis*/
-    moveRelativly(0, 0, temp);
-
-    xDelta = Original - temp;
-    temp = 0;
+    moveRelativly(0, 0, x1);
 
     updateFeedrate(800);
     /* Shift Right by 3cm*/
     moveRelativly(30 / X_STEP_LENGTH_MM, 0, 0);
 
+    x2 = 0;
     updateFeedrate(200);
     /* Probe x = 6cm*/
     while(GPIO_ReadInputDataBit(ZCalPinPort, ZCalPin)){
         while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
         moveRelativly(0, 0, -1);
-        temp++;
+        x2++;
     }
     updateFeedrate(800);
     /*Reset Z Axis*/
-    moveRelativly(0, 0, temp);
+    moveRelativly(0, 0, x2);
 
-    xDelta = ((Original - temp) + xDelta) / 2;
-    temp = 0;
+    xDelta = (((Original - x1) + (x1 - x2)) / 2) / (30 / X_STEP_LENGTH_MM);
     
     updateFeedrate(800);
     /* Reset X*/
@@ -384,35 +382,34 @@ static void calibrateZAxis(void){
     /* Shift Up by 3cm*/
     moveRelativly(0, 30 / Y_STEP_LENGTH_MM, 0);
 
+    y1 = 0;
     updateFeedrate(200);
     /* Probe y = 3cm*/
     while(GPIO_ReadInputDataBit(ZCalPinPort, ZCalPin)){
         while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
         moveRelativly(0, 0, -1);
-        temp++;
+        y1++;
     }
     updateFeedrate(800);
     /*Reset Z Axis*/
-    moveRelativly(0, 0, temp);
-
-    yDelta = Original - temp;
-    temp = 0;
+    moveRelativly(0, 0, y1);
 
     /* Shift Up by 3cm*/
     moveRelativly(0, 30 / Y_STEP_LENGTH_MM, 0);
 
+    y2 = 0;
     updateFeedrate(200);
     /* Probe y = 6cm*/
     while(GPIO_ReadInputDataBit(ZCalPinPort, ZCalPin)){
         while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
         moveRelativly(0, 0, -1);
-        temp++;
+        y2++;
     }
     updateFeedrate(800);
     /*Reset Z Axis*/
-    moveRelativly(0, 0, temp);
+    moveRelativly(0, 0, y2);
 
-    yDelta = ((Original - temp) + yDelta) / 2;
+    yDelta = (((Original - y1) + (y1 - y2)) / 2) / (30 / Y_STEP_LENGTH_MM);
 
     xDelta /= (30 / X_STEP_LENGTH_MM);
     yDelta /= (30 / Y_STEP_LENGTH_MM);
@@ -507,6 +504,19 @@ void CNC_Move(int32_t x, int32_t y, int32_t z){
     operation.opcodes = moveStepper; 
     operation.parameter1 = x;
     operation.parameter2 = y;
+
+    xErrAcc += x * xDelta;
+    if((xErrAcc <= -1) || (xErrAcc >= 1)){
+        z += (int32_t)xErrAcc;
+        xErrAcc -= (int32_t)xErrAcc;
+    }
+
+    yErrAcc += y * yDelta;
+    if((yErrAcc <= -1) || (yErrAcc >= 1)){
+        z += (int32_t)yErrAcc;
+        yErrAcc -= (int32_t)yErrAcc;
+    }
+
     operation.parameter3 = z;
 
     xQueueSend(operationQueue, &operation, portMAX_DELAY);

@@ -192,52 +192,91 @@ uint8_t moveRelativly(int32_t x, int32_t y, int32_t z){
         return 1;
 
 	int32_t i, error_acc;
+    int32_t error_acc_ex;
+    int32_t xf, yf, zf;
 
 	//Decide Direction of rotation
 	int8_t xDirection = x < 0 ? -1 : 1;
 	int8_t yDirection = y < 0 ? -1 : 1;
+	int8_t zDirection = z < 0 ? -1 : 1;
 
 	//Take Absolute Value
 	x = x < 0 ? x * (-1) : x;
 	y = y < 0 ? y * (-1) : y;
+	z = z < 0 ? z * (-1) : z;
 
-	if(z > 0){
-        for(i = 0; i < z; i++){
-		    InsertMove(0, 0, 1);
+	if((x == y) && (x == z)){
+	    for(i = 0; i < x; i++){
+	      InsertMove(xDirection, yDirection, zDirection);
+	    }
+	}else if((x >= y) && (x >= z)){
+        error_acc = x >> 1;
+        error_acc_ex = x >> 1;
+
+        for(i = 0; i < x; i++){
+            error_acc -= y;
+            error_acc_ex -= z;
+            if(error_acc < 0){
+                error_acc += x;
+                yf = 1;
+            }else{
+                yf = 0;
+            }
+
+            if(error_acc_ex < 0){
+                error_acc_ex += x;
+                zf = 1;
+            }else{
+                zf = 0;
+            }
+
+	      InsertMove(xDirection, yf * yDirection, zf * zDirection);
         }
-    }
+	}else if((y >= x) && (y >= z)){
+        error_acc = y >> 1;
+        error_acc_ex = y >> 1;
 
-	if(x == y){
-	    for(i = 0; i < x; i++){
-	      InsertMove(xDirection, yDirection, 0);
-	    }
-	}else if(x > y){
-		error_acc = x / 2;
-	    for(i = 0; i < x; i++){
-			error_acc -= y;
-			if(error_acc < 0){
-				error_acc += x;
-				InsertMove(xDirection, yDirection, 0);
-			}else{
-				InsertMove(xDirection, 0, 0);
-			}
-	    }
-	}else{
-		error_acc = y / 2;
-		for(i = 0; i < y; i++){
-			error_acc -= x;
-			if(error_acc < 0){
-				error_acc += y;
-				InsertMove(xDirection, yDirection, 0);
-			}else{
-				InsertMove(0, yDirection, 0);
-			}
-		}
-	}
+        for(i = 0; i < y; i++){
+            error_acc -= x;
+            error_acc_ex -= z;
+            if(error_acc < 0){
+                error_acc += y;
+                xf = 1;
+            }else{
+                xf = 0;
+            }
 
-	if(z < 0){
-        for(i = z; i < 0; i++){
-		    InsertMove(0, 0, -1);
+            if(error_acc_ex < 0){
+                error_acc_ex += y;
+                zf = 1;
+            }else{
+                zf = 0;
+            }
+
+            InsertMove(xf * xDirection, yDirection, zf * zDirection);
+        }
+    }else if((z >= x) && (z >= y)){
+        error_acc = z >> 1;
+        error_acc_ex = z >> 1;
+
+        for(i = 0; i < z; i++){
+            error_acc -= x;
+            error_acc_ex -= y;
+            if(error_acc < 0){
+                error_acc += z;
+                xf = 1;
+            }else{
+                xf = 0;
+            }
+
+            if(error_acc_ex < 0){
+                error_acc_ex += z;
+                yf = 1;
+            }else{
+                yf = 0;
+            }
+
+            InsertMove(xf * xDirection, yf * yDirection, zDirection);
         }
     }
 
@@ -266,6 +305,7 @@ static void resetHome(void){
         while(uxQueueMessagesWaiting( movementQueue )); // Clear Movements
 
         flag = 0;
+        xxflag = yyflag = 0;
         if(GPIO_ReadInputDataBit(Limit1PinPort, XLimit1Pin) & GPIO_ReadInputDataBit(Limit2PinPort, XLimit2Pin)){
             xxflag = 1;
             flag = 1;

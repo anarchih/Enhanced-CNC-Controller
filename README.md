@@ -26,6 +26,7 @@ Current Supported G-Codes
  - M05
  - M17
  - M18
+ - M30
 
 Dependience Requirement
 =======================

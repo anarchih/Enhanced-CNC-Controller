@@ -12,17 +12,20 @@ Current Supported G-Codes
 =================
  - G00
  - G01
+ - G10
+ - G11
  - G20
  - G21
+ - G28
+ - G29
  - G90
  - G01
- - G92 not fully functional
+ - G92
  - M02
  - M03
  - M05
  - M17
  - M18
- - S
 
 Dependience Requirement
 =======================

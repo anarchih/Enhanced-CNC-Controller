@@ -144,7 +144,9 @@ void line_move(uint32_t gnum, struct Vector v, struct Exist *exist){
 }
 
 static void M03(uint32_t speed, struct Exist *exist){
-    CNC_SetSpindleSpeed(speed);
+    if(exist->s){
+        CNC_SetSpindleSpeed(speed);
+    }
 }
 
 static void G10(struct Vector v, struct Exist *exist){
@@ -171,8 +173,7 @@ static void G11(void){
 static void G28(struct Vector v, struct Exist *exist){
     uint32_t tmp = abs_mode;
     abs_mode = 1;
-    retriveParameters(gcode, &exist, &v1, NULL, NULL, NULL);
-    line_move(0, v, &exist);
+    line_move(0, v, exist);
     CNC_HomeSurface();
     abs_mode = tmp;
     return;
@@ -181,9 +182,8 @@ static void G28(struct Vector v, struct Exist *exist){
 static void G29(struct Vector v, struct Exist *exist){
     uint32_t tmp = abs_mode;
     abs_mode = 1;
-    retriveParameters(gcode, &exist, &v1, NULL, NULL, NULL);
     CNC_HomeSurface();
-    line_move(0, v, &exist);
+    line_move(0, v, exist);
     abs_mode = tmp;
     return;
 }

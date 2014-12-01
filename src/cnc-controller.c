@@ -559,7 +559,7 @@ void CNC_SetSpindleSpeed(uint32_t speed){
     if(operationQueue == 0)
         return;
     operation.opcodes = setSpindleSpeed;
-    operation.parameter1 = speed; 
+    operation.parameter1 = 100 * speed / MAX_SPINDLE_SPEED; 
     xQueueSend(operationQueue, &operation, portMAX_DELAY);
     return;
 }

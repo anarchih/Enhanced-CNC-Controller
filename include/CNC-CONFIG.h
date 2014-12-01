@@ -1,6 +1,8 @@
 #ifndef __CNCCONFIG__
 #define __CNCCONFIG__
 
+#define MAX_SPINDLE_SPEED 12000
+
 #define Y_STEP_LENGTH_MM 0.00625
 #define X_STEP_LENGTH_MM 0.00625
 #define Z_STEP_LENGTH_MM 0.004

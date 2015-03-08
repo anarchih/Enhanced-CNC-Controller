@@ -504,17 +504,21 @@ void CNC_Move(int32_t x, int32_t y, int32_t z){
     if(operationQueue == 0)
         return;
 
+    x = sqrt(x * x / 1 + xDelta * xDelta);
+    y = sqrt(y * y / 1 + yDelta * yDelta);
+
+    xErrAcc += x * xDelta;
+    yErrAcc += y * yDelta;
+
     operation.opcodes = moveStepper; 
     operation.parameter1 = x;
     operation.parameter2 = y;
 
-    xErrAcc += x * xDelta;
     if((xErrAcc <= -1) || (xErrAcc >= 1)){
         z += (int32_t)xErrAcc;
         xErrAcc -= (int32_t)xErrAcc;
     }
 
-    yErrAcc += y * yDelta;
     if((yErrAcc <= -1) || (yErrAcc >= 1)){
         z += (int32_t)yErrAcc;
         yErrAcc -= (int32_t)yErrAcc;
